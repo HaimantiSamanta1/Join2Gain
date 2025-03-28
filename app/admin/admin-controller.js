@@ -4,6 +4,9 @@ const userService = require('../services/user-service');
 const jwtTokenService = require('../services/jwt-service');
 const refresh = require('../jwt/refresh-model');
 const moment = require('moment');
+const adminService = require('../services/admin-service');
+const admins =require('../admin/admin-model')
+const bcrypt = require('bcrypt');
 
 const generateUserId = () => {
     return `USER${Date.now()}${Math.floor(Math.random() * 1000)}`;
@@ -95,3 +98,92 @@ exports.addUser = async (req, res) => {
     }
 };
 //Add New User Account END
+
+// //Add New admin Account START
+// exports.adminRegistration = async (req, res) => {
+//     try {
+//         const { email_id, password } = req.body;
+
+//         // Check if required fields are provided
+//         if (!email_id || !password) {
+//             return res.status(406).json({ Status: false, message: 'Email and password are required fields!' });
+//         }
+
+//         // Validate email format
+//         if (!validator.validate(email_id)) {
+//             return res.status(400).json({ Status: false, message: 'Email is not valid' });
+//         }
+
+//         // Check if the admin already exists
+//         const existingAdmin = await adminService.findAdminAccount(email_id);
+//         if (existingAdmin) {
+//             return res.status(400).json({ Status: false, message: 'This email already exists' });
+//         }
+
+//         // Hash the password
+//         const hashedPassword = await bcrypt.hash(password, 10);
+
+//         // Create admin data object
+//         const adminData = {
+//             email_id: email_id,
+//             password: hashedPassword
+//         };
+
+//         // Create the admin account
+//         const response = await adminService.createAdminAccount(adminData);
+
+//         // Generate JWT token
+//         const Authorization = jwtTokenService.generateJwtToken({ admin_id: response._id, LoggedIn: true });
+
+//         // Store refresh token linked with `admin_id`
+//         await jwtTokenService.storeRefreshToken1(Authorization, response._id, true);  // Pass `true` to indicate admin
+
+//         // Find refresh token linked with `admin_id`
+//         const findToken = await refresh.findOne({ admin_id: response._id }).select('_id');
+
+//         // Update the admin's tokens field with the refresh token ID
+//         await admins.findByIdAndUpdate(
+//             response._id,
+//             { $push: { tokens: findToken._id } },
+//             { new: true }
+//         );
+
+//         return res.status(200).json({
+//             Status: true,
+//             message: 'Admin registered successfully'
+//         });
+
+//     } catch (err) {
+//         console.error(err);
+//         return res.status(500).json({ Status: false, message: 'Internal Server Error' });
+//     }
+// };
+// //Add New admin Account END
+
+//Admin login START
+exports.loginAdmin = async (req, res) => {
+    try {
+        const { email_id, password} = req.body;
+
+        // Check if email and password are provided
+        if (!email_id || !password) {
+            return res.status(400).json({ status: false, message: 'Email and password are required.' });
+        }
+
+        // Find admin by email
+        const admin = await adminService.findAdminAccount(email_id);
+
+        if (!admin || admin.password !== password) {
+            return res.status(401).json({ status: false, message: 'The email/password is invalid.' });
+        }
+
+        return res.status(200).json({
+            status: true,
+            message: 'Login successful!'
+        });
+    } catch (err) {
+        console.log('err', err.message);
+        return res.status(400).json({ Status: 'Error', message: 'somthing went wrong' })
+    }
+}
+//Admin login END

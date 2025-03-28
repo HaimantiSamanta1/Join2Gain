@@ -146,7 +146,7 @@ exports.loginUser = async (req, res) => {
             user_name:user.name,
             user_id:user._id,
             accessToken: newAccessToken,           
-            //data:user
+            data:user
         });
     } catch (err) {
         console.log('err', err.message);
@@ -265,7 +265,6 @@ exports.getUsers = async (req, res) => {
 };
 //Get all user details END
 
-
 //Add file of pan card START
 exports.addPanCardFile = async (req, res) => {
     try {
@@ -373,7 +372,6 @@ exports.addBankPassbookFile = async (req, res) => {
     }
 };
 //Add file of Bank passbook END
-
 
 //Aadhar file download START 
 exports.downloadAadharFile = async (req, res) => {
@@ -530,3 +528,15 @@ exports.downloadBankPassbookFile = async (req, res) => {
     }
 };
 //Bank passbook file download END
+
+//Add top-up START
+// exports.addTopUp = async (req,res) => {
+//     try {
+//         const {invest_type,utr_no,invest_amount,} = req.body;
+        
+//     } catch (error) {
+//         console.error('Error downloading major project file:', error);
+//         res.status(500).json({ error: 'Internal server error' }); 
+//     }
+// };
+//Add top-up end

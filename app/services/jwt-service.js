@@ -24,6 +24,18 @@ class JwtService{
             throw err
         }
     }
+
+    // async storeRefreshToken1(refreshToken, identifier, isAdmin = false) {
+    //     try {
+    //         const data = isAdmin ? { token: refreshToken, admin_id: identifier } : { token: refreshToken, user_id: identifier };
+    //         await Refresh.create(data);
+    //     } catch (err) {
+    //         console.log('storerefresherr', err);
+    //         throw err;
+    //     }
+    // }
+    
+    
     //Store Refresh Token END
 
     //Verify AccessToken START
