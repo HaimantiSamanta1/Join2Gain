@@ -22,16 +22,16 @@ route.patch('/editUserPassword/:user_id',VerifyJwtToken,userController.editUserP
 route.put('/updateUserProfile/:user_id',VerifyJwtToken,userController.updateUserProfile);
 
 //Upload file of PAN
-route.patch('/addPanCardFile/:_id',uploadPanCardFile.single('file'),userController.addPanCardFile);
-route.get('/downloadPanFile/:filename',userController.downloadPanFile);
+route.patch('/addPanCardFile/:_id',VerifyJwtToken,uploadPanCardFile.single('file'),userController.addPanCardFile);
+route.get('/downloadPanFile/:filename',VerifyJwtToken,userController.downloadPanFile);
 
 
 //Upload file of Aadhar
-route.patch('/addAadharCardFile/:_id',uploadAadharFile.single('file'),userController.addAadharCardFile);
-route.get('/downloadAadharFile/:filename',userController.downloadAadharFile);
+route.patch('/addAadharCardFile/:_id',VerifyJwtToken,uploadAadharFile.single('file'),userController.addAadharCardFile);
+route.get('/downloadAadharFile/:filename',VerifyJwtToken,userController.downloadAadharFile);
 
 //Upload file of Bank Passbook
-route.patch('/addBankPassbookFile/:_id',uploadBankPassbookFile.single('file'),userController.addBankPassbookFile);
-route.get('/downloadBankPassbookFile/:filename',userController.downloadBankPassbookFile);
+route.patch('/addBankPassbookFile/:_id',VerifyJwtToken,uploadBankPassbookFile.single('file'),userController.addBankPassbookFile);
+route.get('/downloadBankPassbookFile/:filename',VerifyJwtToken,userController.downloadBankPassbookFile);
 
 module.exports = route; 
