@@ -101,6 +101,36 @@ const userSchema = new Schema({
         type: Number,
         default: " " 
     },
+    uploaded_pan_file:{
+        type:String,
+        default:" ",   
+        set:(file)=>{
+            if(file){
+                return file  
+            }
+            return ;
+        },
+    },
+    uploaded_bank_passbook_file:{
+        type:String,
+        default:" ",   
+        set:(file)=>{
+            if(file){
+                return file  
+            }
+            return ;
+        },
+    },
+    uploaded_aadher_file:{
+        type:String,
+        default:" ",   
+        set:(file)=>{
+            if(file){
+                return file  
+            }
+            return ;
+        },
+    },
     tokens: [{
         type: mongoose.Schema.Types.ObjectId,
         default: " ",

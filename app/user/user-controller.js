@@ -5,6 +5,8 @@ const jwtTokenService = require('../services/jwt-service');
 const bcrypt = require('bcrypt');
 const refresh = require('../jwt/refresh-model');
 const moment = require('moment');
+const path = require('path');
+const fs = require('fs');
 
 const generateUserId = () => {
     return `USER${Date.now()}${Math.floor(Math.random() * 1000)}`;
@@ -260,3 +262,266 @@ exports.getUsers = async (req, res) => {
     }
 };
 //Get all user details END
+
+
+//Add file of pan card START
+exports.addPanCardFile = async (req, res) => {
+    try {
+        const { _id } = req.params;
+        const user = await users.findById(_id);
+
+        if (!user) {
+            return res.status(400).json({ Status: false, message: 'User ID not found' });
+        }
+
+        if (!req.file) {
+            return res.status(400).json({ Status: false, message: 'Pan card file is not uploaded' });
+        }
+
+        const filename = req.file.filename;
+
+        const result = await users.findOneAndUpdate(
+            { _id: _id },
+            { $set: { uploaded_pan_file: filename } },
+            { new: true }
+        );
+
+        return res.status(200).json({
+            Status: true,
+            message: "Pan card file uploaded successfully.",
+            result
+        });
+
+    } catch (err) {
+        console.error(err);
+        return res.status(400).json({ Status: false, message: err.message });
+    }
+};
+//Add file of pan card END
+
+//Add file of Aadhar card START
+exports.addAadharCardFile = async (req, res) => {
+    try {
+        const { _id } = req.params;
+        const user = await users.findById(_id);
+
+        if (!user) {
+            return res.status(400).json({ Status: false, message: 'User ID not found' });
+        }
+
+        if (!req.file) {
+            return res.status(400).json({ Status: false, message: 'Aadhar card file is not uploaded' });
+        }
+
+        const filename = req.file.filename;
+
+        const result = await users.findOneAndUpdate(
+            { _id: _id },
+            { $set: { uploaded_aadher_file: filename } },
+            { new: true }
+        );
+
+        return res.status(200).json({
+            Status: true,
+            message: "Aadhar card file uploaded successfully.",
+            result
+        });
+
+    } catch (err) {
+        console.error(err);
+        return res.status(400).json({ Status: false, message: err.message });
+    }
+};
+//Add file of Aadhar card END
+
+//Add file of Bank Passbook START
+exports.addBankPassbookFile = async (req, res) => {
+    try {
+        const { _id } = req.params;
+        const user = await users.findById(_id);
+
+        if (!user) {
+            return res.status(400).json({ Status: false, message: 'User ID not found' });
+        }
+
+        if (!req.file) {
+            return res.status(400).json({ Status: false, message: 'Bank passbook file is not uploaded' });
+        }
+
+        const filename = req.file.filename;
+
+        const result = await users.findOneAndUpdate(
+            { _id: _id },
+            { $set: { uploaded_bank_passbook_file: filename } },
+            { new: true }
+        );
+
+        return res.status(200).json({
+            Status: true,
+            message: "Bank passbook file uploaded successfully.",
+            result
+        });
+
+    } catch (err) {
+        console.error(err);
+        return res.status(400).json({ Status: false, message: err.message });
+    }
+};
+//Add file of Bank passbook END
+
+
+//Aadhar file download START 
+exports.downloadAadharFile = async (req, res) => {
+    try {
+       // let { token } = req.userData;
+        const dir = path.join(__dirname, '..', '..', 'JoinToGain', 'AadharCardFiles');
+
+        // Ensure the directory exists
+        await fs.promises.mkdir(dir, { recursive: true });
+
+        console.log('Directory:', dir);
+
+        const filename = req.params.filename;
+
+        // Read the files in the directory using fs.promises.readdir
+        const filesInFolder = await fs.promises.readdir(dir);
+        console.log('Files in directory:', filesInFolder);
+
+        const filePath = path.join(dir, filename);
+
+        // Log the full file path
+        console.log('Full File Path:', filePath);
+
+        // Check if the file exists
+        if (fs.existsSync(filePath)) {
+            // Determine the file extension
+            const fileExtension = path.extname(filePath).toLowerCase();
+
+            // Set content type based on file extension
+            let contentType = 'application/octet-stream'; // Default content type
+            if (fileExtension === '.pdf') {
+                contentType = 'application/pdf';
+            } else if (fileExtension === '.jpg' || fileExtension === '.jpeg') {
+                contentType = 'image/jpeg';
+            } else if (fileExtension === '.xls' || fileExtension === '.xlsx') {
+                contentType = 'application/vnd.ms-excel';
+            } // Add more conditions for other file types if needed
+
+            // Stream the file to the client
+            const fileStream = fs.createReadStream(filePath);
+            res.setHeader('Content-Type', contentType);
+            res.setHeader('Content-Disposition', `attachment; filename=${filename}`);
+            fileStream.pipe(res);
+        } else {
+            res.status(404).json({ error: 'File not found' });
+        }
+    } catch (error) {
+        console.error('Error downloading major project file:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};
+//Aadhar file download END
+
+//Pan file download START 
+exports.downloadPanFile = async (req, res) => {
+    try {
+       // let { token } = req.userData;
+        const dir = path.join(__dirname, '..', '..', 'JoinToGain', 'PanCardFiles');
+
+        // Ensure the directory exists
+        await fs.promises.mkdir(dir, { recursive: true });
+
+        console.log('Directory:', dir);
+
+        const filename = req.params.filename;
+
+        // Read the files in the directory using fs.promises.readdir
+        const filesInFolder = await fs.promises.readdir(dir);
+        console.log('Files in directory:', filesInFolder);
+
+        const filePath = path.join(dir, filename);
+
+        // Log the full file path
+        console.log('Full File Path:', filePath);
+
+        // Check if the file exists
+        if (fs.existsSync(filePath)) {
+            // Determine the file extension
+            const fileExtension = path.extname(filePath).toLowerCase();
+
+            // Set content type based on file extension
+            let contentType = 'application/octet-stream'; // Default content type
+            if (fileExtension === '.pdf') {
+                contentType = 'application/pdf';
+            } else if (fileExtension === '.jpg' || fileExtension === '.jpeg') {
+                contentType = 'image/jpeg';
+            } else if (fileExtension === '.xls' || fileExtension === '.xlsx') {
+                contentType = 'application/vnd.ms-excel';
+            } // Add more conditions for other file types if needed
+
+            // Stream the file to the client
+            const fileStream = fs.createReadStream(filePath);
+            res.setHeader('Content-Type', contentType);
+            res.setHeader('Content-Disposition', `attachment; filename=${filename}`);
+            fileStream.pipe(res);
+        } else {
+            res.status(404).json({ error: 'File not found' });
+        }
+    } catch (error) {
+        console.error('Error downloading major project file:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};
+//Pan file download END
+
+//Bank passbook file download START 
+exports.downloadBankPassbookFile = async (req, res) => {
+    try {
+       // let { token } = req.userData;
+        const dir = path.join(__dirname, '..', '..', 'JoinToGain', 'BankPassbookFiles');
+
+        // Ensure the directory exists
+        await fs.promises.mkdir(dir, { recursive: true });
+
+        console.log('Directory:', dir);
+
+        const filename = req.params.filename;
+
+        // Read the files in the directory using fs.promises.readdir
+        const filesInFolder = await fs.promises.readdir(dir);
+        console.log('Files in directory:', filesInFolder);
+
+        const filePath = path.join(dir, filename);
+
+        // Log the full file path
+        console.log('Full File Path:', filePath);
+
+        // Check if the file exists
+        if (fs.existsSync(filePath)) {
+            // Determine the file extension
+            const fileExtension = path.extname(filePath).toLowerCase();
+
+            // Set content type based on file extension
+            let contentType = 'application/octet-stream'; // Default content type
+            if (fileExtension === '.pdf') {
+                contentType = 'application/pdf';
+            } else if (fileExtension === '.jpg' || fileExtension === '.jpeg') {
+                contentType = 'image/jpeg';
+            } else if (fileExtension === '.xls' || fileExtension === '.xlsx') {
+                contentType = 'application/vnd.ms-excel';
+            } // Add more conditions for other file types if needed
+
+            // Stream the file to the client
+            const fileStream = fs.createReadStream(filePath);
+            res.setHeader('Content-Type', contentType);
+            res.setHeader('Content-Disposition', `attachment; filename=${filename}`);
+            fileStream.pipe(res);
+        } else {
+            res.status(404).json({ error: 'File not found' });
+        }
+    } catch (error) {
+        console.error('Error downloading major project file:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};
+//Bank passbook file download END

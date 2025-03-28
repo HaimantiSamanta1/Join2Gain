@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Payment Success</title>
+</head>
+<body>
+    <h2>Payment Details</h2>
+    <p><b>Payment ID:</b> <%= payment_id %></p>
+    <p><b>Amount Paid:</b> Rs. <%= amount %></p>
+
+    <button id="confirmCapture">Confirm Payment</button>
+
+    <script>
+        document.getElementById("confirmCapture").addEventListener("click", function() {
+            fetch("/api/payment/capturePayment", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ payment_id: "<%= payment_id %>", amount: "<%= amount %>" * 100 })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) alert("Payment Captured Successfully!");
+                else alert("Payment Capture Failed!");
+            });
+        });
+    </script>
+</body>
+</html>

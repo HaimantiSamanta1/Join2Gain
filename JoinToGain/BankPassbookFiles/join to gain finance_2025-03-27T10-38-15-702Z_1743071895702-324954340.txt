@@ -1,0 +1,66 @@
+500+100 = 600
+5000-600=4400
+5000+4400=9400
+
+---------------------------------Monthly income plane------------------------------
+investment amount = 1,00,000
+
+total month = 20 
+monthly capital payout = 1,00,000 / 20 = 5,000
+monthly profit payout = 5,000 - (500+100) = 4400
+
+monthly total payout = 5,000 + 4,400 = 9,400
+
+
+-----------------------Long term plane---------------------------------------------
+
+investment amount =2,00,000
+
+monthly interest (4% 0f investment)= 2,00,000 * 0.04 = 8,000
+
+TDS deduction =10%  = 8000 * 0.1 =800
+service charges=2% = 8000 * 0.02 = 160
+monthly payout =8000 -(800+160)= 7,040
+
+Annual earning = 8000 * 12 = 96,000 
+Annual payout = 7040 * 12 = 84,480
+
+5 years returns = 96000 * 5 = 4,80,000
+5 years payout = 84,480 * 5 = 4,22,400
+
+10 years returns = 96000 * 10 = 9,60,000
+10 years payout =84,480 * 10 = 8,44,800
+
+
+capital returns = 2,00,000
+
+total earnings (10 years) = 9,60,000 + 2,00,000 =11,60,000
+
+total earnings (5 years) = 4,80,000 + 2,00,000 =6,80,000
+
+total earnings (1 years) = 96,000 + 2,00,000 = 2,96,000
+
+-------------------------------------------------------------------------
+key_id,key_secret
+rzp_test_RPxHAGB4hVZ6hM,UmmQHzjsGWqsAd5YYk2XZSIk
+
+
+
+
+
+
+{
+    "amount": 50000,
+    "amount_due": 50000,
+    "amount_paid": 0,
+    "attempts": 0,
+    "created_at": 1742991363,
+    "currency": "INR",
+    "entity": "order",
+    "id": "order_QBPpbseuqwWpNw",
+    "notes": [],
+    "offer_id": null,
+    "receipt": "order_12345",
+    "status": "created"
+}
+
