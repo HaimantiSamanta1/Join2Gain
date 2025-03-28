@@ -101,6 +101,14 @@ const userSchema = new Schema({
         type: Number,
         default: " " 
     },
+    user_rank:{
+        type: String,
+        default: " " 
+    },
+    user_level:{
+        type: String,
+        default: " "
+    },
     uploaded_pan_file:{
         type:String,
         default:" ",   

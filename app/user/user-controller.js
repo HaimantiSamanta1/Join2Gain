@@ -269,6 +269,7 @@ exports.getUsers = async (req, res) => {
 //Add file of pan card START
 exports.addPanCardFile = async (req, res) => {
     try {
+        let { token } = req.userData;
         const { _id } = req.params;
         const user = await users.findById(_id);
 
@@ -304,6 +305,7 @@ exports.addPanCardFile = async (req, res) => {
 //Add file of Aadhar card START
 exports.addAadharCardFile = async (req, res) => {
     try {
+        let { token } = req.userData;
         const { _id } = req.params;
         const user = await users.findById(_id);
 
@@ -339,6 +341,7 @@ exports.addAadharCardFile = async (req, res) => {
 //Add file of Bank Passbook START
 exports.addBankPassbookFile = async (req, res) => {
     try {
+        let { token } = req.userData;
         const { _id } = req.params;
         const user = await users.findById(_id);
 
@@ -375,7 +378,7 @@ exports.addBankPassbookFile = async (req, res) => {
 //Aadhar file download START 
 exports.downloadAadharFile = async (req, res) => {
     try {
-       // let { token } = req.userData;
+        let { token } = req.userData;
         const dir = path.join(__dirname, '..', '..', 'JoinToGain', 'AadharCardFiles');
 
         // Ensure the directory exists
@@ -427,7 +430,7 @@ exports.downloadAadharFile = async (req, res) => {
 //Pan file download START 
 exports.downloadPanFile = async (req, res) => {
     try {
-       // let { token } = req.userData;
+        let { token } = req.userData;
         const dir = path.join(__dirname, '..', '..', 'JoinToGain', 'PanCardFiles');
 
         // Ensure the directory exists
@@ -479,7 +482,7 @@ exports.downloadPanFile = async (req, res) => {
 //Bank passbook file download START 
 exports.downloadBankPassbookFile = async (req, res) => {
     try {
-       // let { token } = req.userData;
+        let { token } = req.userData;
         const dir = path.join(__dirname, '..', '..', 'JoinToGain', 'BankPassbookFiles');
 
         // Ensure the directory exists
