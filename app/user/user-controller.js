@@ -7,6 +7,7 @@ const refresh = require('../jwt/refresh-model');
 const moment = require('moment');
 const path = require('path');
 const fs = require('fs');
+const mongoose = require('mongoose');
 
 const generateUserId = () => {
     return `USER${Date.now()}${Math.floor(Math.random() * 1000)}`;
@@ -34,7 +35,8 @@ exports.addNewMember = async (req, res) => {
         const user = await userService.finduserAccountdetails(accessToken);
         console.log("User",user);
         console.log("Login user name",user.name);
-        console.log("Login user id",user.user_profile_id)
+        console.log("Login user profile id",user.user_profile_id)
+        console.log("Login user id",user._id);
         if (!user) {
             return res.status(401).json({
                 success: false,
@@ -98,9 +100,16 @@ exports.addNewMember = async (req, res) => {
             nominee_relationship:capitalizedNomineeRelationship,
             user_profile_id: user_profile_id,
             password: password,           
-        };
-      
+        };      
         const response = await userService.createAccount(data);
+        const referrals = await users.findByIdAndUpdate(
+            user._id,
+            { 
+            $push: { referrals: response._id},
+            $inc: { no_of_direct_referrals : 1 }
+            },
+            { new: true }
+        );
         const Authorization = jwtTokenService.generateJwtToken({ user_id: response._id, LoggedIn: true });
         await jwtTokenService.storeRefreshToken(Authorization, response._id);
         const findToken = await refresh.findOne({ user_id: response._id }).select('_id');
@@ -530,13 +539,107 @@ exports.downloadBankPassbookFile = async (req, res) => {
 //Bank passbook file download END
 
 //Add top-up START
-// exports.addTopUp = async (req,res) => {
-//     try {
-//         const {invest_type,utr_no,invest_amount,} = req.body;
+exports.addTopUp = async (req, res) => {
+    try {
+        let { token } = req.userData;
+        const { userId } = req.params; 
+        const { invest_type, utr_no, invest_amount, invest_duration_in_month } = req.body;
+        const filename = req.file.filename;
+
+        // Validate investment type
+        if (!["Monthly", "monthly", "Long term", "long term"].includes(invest_type)) {
+            return res.status(400).json({ error: "Invalid investment type. Use 'Monthly' or 'Long term'." });
+        }
+
+        // Validate investment amount (should be 1 lakh or a multiple of 1 lakh)
+        if (invest_amount < 100000 || invest_amount % 100000 !== 0) {
+            return res.status(400).json({ error: "Investment amount must be at least 1 lakh or a multiple of 1 lakh." });
+        }
+
+        // Set duration based on investment type
+        let duration = invest_type.toLowerCase() === "monthly" ? 20 : invest_duration_in_month;
+
+        // // Validate duration for long-term investment
+        // if (invest_type.toLowerCase() === "long term" && (duration < 12 || duration % 12 !== 0)) {
+        //     return res.status(400).json({ error: "For 'Long term' investment, duration must be at least 12 months or a multiple of 12 months." });
+        // }
         
-//     } catch (error) {
-//         console.error('Error downloading major project file:', error);
-//         res.status(500).json({ error: 'Internal server error' }); 
-//     }
-// };
-//Add top-up end
+         // Ensure invest_duration_in_month is provided for "Long term" investments
+         if (invest_type.toLowerCase() === "long term") {
+            if (!invest_duration_in_month) {
+                return res.status(400).json({ error: "For 'Long term' investment, invest_duration_in_month is required." });
+            }
+            if (invest_duration_in_month < 12 || invest_duration_in_month % 12 !== 0) {
+                return res.status(400).json({ error: "For 'Long term' investment, duration must be at least 12 months or a multiple of 12 months." });
+            }
+        }
+
+        // Find user by ID
+        const user = await users.findById(userId);
+        if (!user) {
+            return res.status(404).json({ error: "User not found." });
+        }
+
+        // Create new investment entry
+        const newInvestment = {
+            _id: new mongoose.Types.ObjectId(),
+            invest_no: user.investment_info.length + 1,
+            invest_type,
+            utr_no,
+            invest_amount,
+            invest_apply_date: moment().toISOString(),
+            invest_duration_in_month: duration,
+            uploaded_proof_file:filename
+        };
+    
+        // Push investment to user's investment_info array
+        user.investment_info.push(newInvestment);
+        await user.save();
+
+        res.status(200).json({ message: "Investment added successfully.", investment: newInvestment });
+
+    } catch (error) {
+        console.error("Error adding investment:", error);
+        res.status(500).json({ error: "Internal server error." });
+    }
+};
+//Add top-up END
+
+//Get top-up START
+exports.getTopUp = async (req, res) => {
+    try {
+        let { token } = req.userData;
+        let { user_id } = req.params;
+        let data = await userService.findAndGetUserAccount(user_id)
+        if (data) {
+            return res.status(200).json({ 
+                Status: true, message: 'Get user TopUp details successful!', 
+                investment_info:data.data.investment_info,               
+            })
+        } else {
+            return res.status(404).send({ Status: false, message: 'Not Found User Account' })
+        }
+  
+    } catch (error) {
+        console.error("Error getting investment:", error);
+        res.status(500).json({ error: "Internal server error." });
+    }
+};
+//Get top-up END
+
+//Get Inactive user details START
+exports.getInactiveUsers = async (req, res) => {
+    try {
+        let { token } = req.userData;
+        // Fetch all users from userService
+        const users = await userService.getiunactiveUserDetails();
+        // Return only inactive users
+        res.status(200).json(users);
+    } catch (error) {
+        console.error('Server Error:', error.message);
+        res.status(500).json({ message: 'Server Error', error: error.message });
+    }
+};
+
+//Get Inactive user details END
+

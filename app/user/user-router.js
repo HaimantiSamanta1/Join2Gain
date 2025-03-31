@@ -7,6 +7,7 @@ const VerifyJwtToken = require('../../app/jwt/verifyAccessToken');
 const {uploadPanCardFile} =require('../middleware/pan-file');
 const {uploadAadharFile} =require('../middleware/aadher-file');
 const {uploadBankPassbookFile} =require('../middleware/bank-passbook-file');
+const {uploadTopUpProofFile} =require('../middleware/topup_proof_file');
 
 //Add New user
 route.post('/addNewMember',userController.addNewMember);
@@ -14,6 +15,8 @@ route.post('/addNewMember',userController.addNewMember);
 route.post('/loginUser',userController.loginUser);
 //Get all user
 route.get('/getUsers',VerifyJwtToken,userController.getUsers);
+//Get Inactive members
+route.get('/getInactiveUsers',VerifyJwtToken,userController.getInactiveUsers);
 //Get a particuler user
 route.get('/getUser/:user_id',VerifyJwtToken,userController.getUser);
 //Edit user password
@@ -33,5 +36,12 @@ route.get('/downloadAadharFile/:filename',VerifyJwtToken,userController.download
 //Upload file of Bank Passbook
 route.patch('/addBankPassbookFile/:_id',VerifyJwtToken,uploadBankPassbookFile.single('file'),userController.addBankPassbookFile);
 route.get('/downloadBankPassbookFile/:filename',VerifyJwtToken,userController.downloadBankPassbookFile);
+
+
+//Add TopUp
+route.post('/addTopUp/:userId',VerifyJwtToken,uploadTopUpProofFile.single('file'),userController.addTopUp);
+//Get a particuler user
+route.get('/getTopUp/:user_id',VerifyJwtToken,userController.getTopUp);
+
 
 module.exports = route; 

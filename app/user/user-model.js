@@ -81,6 +81,10 @@ const userSchema = new Schema({
         type: String,
         default: " "
     },
+    user_status:{
+        type: String,
+        default: "Inactive"
+    },
     // password:{
     //     type: String,
     //     default: " "
@@ -107,7 +111,7 @@ const userSchema = new Schema({
     },
     user_level:{
         type: String,
-        default: " "
+        default: "level 1"
     },
     investment_info: [{
         invest_no: { type: Number, default: 0},
@@ -147,7 +151,9 @@ const userSchema = new Schema({
                 message: 'Invalid date format for date of invest confirm date!',
             },
          },
+
         invest_duration_in_month: { type: Number,default: 0 }, 
+
         roi_percentage: { type: Number ,default:0},
         capital_amount: { type: Number,default: 0},
         profit_amount: { type: Number, default: 0},
@@ -156,22 +162,22 @@ const userSchema = new Schema({
         tds_deduction_amount: { type: Number, default: 0 },
         sc_deduction_amount: { type: Number, default: 0 },
         profit_amount_after_tds_sc_deduction: { type: Number,default: 0 },
-        net_amount: { type: Number,default: 0 },
-        remarks: { type: String,default: " " }
+        net_amount_per_month: { type: Number,default: 0 },
+        remarks: { type: String,default: " " },
+        kyc_status:{type: String,default: " "},
+        // roi_payout_dates:[{ type: Date, default: null }]
+        roi_payout_status: [{
+            payout_date: { type: Date, default: null },
+            status: { type: String, default: "Pending" }  // Pending, Approved, Rejected
+        }]
+        
     }],
-    referrals_info:[{
-        referral_id:
-        {
-            type: mongoose.Schema.Types.ObjectId,
-            default: " ",
-            ref: 'usermaster'
-        },
-        referral_invest_amount:{
-            type: Number,
-            default: 0
-        },        
+    referrals: [{
+        type: mongoose.Schema.Types.ObjectId,
+        default: " ",
+        ref: 'usermaster'
     }],
-    no_of_referrals:{
+    no_of_direct_referrals:{
         type: Number,
         default: 0
     },

@@ -187,3 +187,106 @@ exports.loginAdmin = async (req, res) => {
     }
 }
 //Admin login END
+
+//Approved kyc START
+exports.kycApprovedRejected = async (req, res) => {
+    try {
+        const { investmentId } = req.params;
+        const { kyc_status } = req.body;
+
+        if (!investmentId) {
+            return res.status(400).json({ Status: 'Error', message: 'Investment ID is required' });
+        }
+
+        if (!kyc_status) {
+            return res.status(400).json({ Status: 'Error', message: 'KYC Status is required' });
+        }
+
+        // Find the user who has this investment ID
+        const user = await users.findOne({ 'investment_info._id': investmentId });
+
+        if (!user) {
+            return res.status(404).json({ Status: 'Error', message: 'User or Investment not found' });
+        }
+
+        // Find the specific investment record
+        const investment = user.investment_info.id(investmentId);
+        if (!investment) {
+            return res.status(404).json({ Status: 'Error', message: 'Investment not found' });
+        }
+
+        // Update fields based on KYC status
+        investment.kyc_status = kyc_status;
+
+        if (kyc_status.toLowerCase() === 'approved') {
+            user.user_status = 'Active';
+            const currentDate = moment();
+            investment.invest_confirm_date = moment().toDate();
+
+            let firstPayoutDate;
+
+            if (currentDate.date() >= 1 && currentDate.date() <= 10) {
+                firstPayoutDate = moment().add(1, 'months').date(10);
+            } else if (currentDate.date() >= 11 && currentDate.date() <= 20) {
+                firstPayoutDate = moment().add(1, 'months').date(20);
+            } else {
+                firstPayoutDate = moment().add(2, 'months').date(1);
+            }
+
+            // Store the payout date
+            investment.roi_payout_dates = [firstPayoutDate.toDate()];
+
+
+            investment.roi_percentage = 10;
+
+            if (investment.invest_type.toLowerCase() === 'monthly') {
+                investment.capital_amount = investment.invest_amount / investment.invest_duration_in_month;
+                investment.profit_amount = investment.invest_amount / investment.invest_duration_in_month;
+                investment.tds_deduction_percentage = 10;
+                investment.service_charges_deduction_percentage = 2;
+
+                investment.tds_deduction_amount = (investment.tds_deduction_percentage / 100) * investment.profit_amount;
+                investment.sc_deduction_amount = (investment.service_charges_deduction_percentage / 100) * investment.profit_amount;
+
+                investment.net_amount_per_month = investment.capital_amount + (investment.profit_amount - (investment.tds_deduction_amount + investment.sc_deduction_amount));
+            }
+            if (investment.invest_type.toLowerCase() === 'long term') {
+                if (investment.invest_amount >= 100000 && investment.invest_amount <= 400000) {
+                    investment.roi_percentage = 4;
+                } else if (investment.invest_amount >= 500000) {
+                    investment.roi_percentage = 5;
+                }
+
+                investment.profit_amount = investment.invest_amount * (investment.roi_percentage / 100);
+                investment.tds_deduction_percentage = 10;
+                investment.service_charges_deduction_percentage = 2;
+                investment.tds_deduction_amount = (investment.tds_deduction_percentage / 100) * investment.profit_amount;
+                investment.sc_deduction_amount = (investment.service_charges_deduction_percentage / 100) * investment.profit_amount;
+
+                investment.profit_amount_after_tds_sc_deduction = investment.profit_amount - (investment.tds_deduction_amount + investment.sc_deduction_amount);
+                investment.net_amount_per_month = investment.profit_amount_after_tds_sc_deduction;
+            }
+
+        }
+
+        await user.save();
+
+        return res.status(200).json({ Status: 'Success', message: 'KYC status updated successfully', user });
+
+    } catch (error) {
+        console.error('Error:', error.message);
+        return res.status(500).json({ Status: 'Error', message: 'Something went wrong' });
+    }
+};
+//Approved kyc END
+
+//Withdrow Approved START
+exports.withdrowApprovedRejected = async (req, res) => {
+    try {
+        
+    } catch (error) {
+            console.error('Error:', error.message);
+            return res.status(500).json({ Status: 'Error', message: 'Something went wrong' });
+    }
+}
+//Withdrow Approved START

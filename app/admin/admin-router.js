@@ -13,5 +13,10 @@ route.post('/loginAdmin',adminController.loginAdmin);
 //Register new user
 route.post('/addUser',adminController.addUser);
 
+//kyc Approved or Rejected
+route.post('/kycApprovedRejected/:investmentId',adminController.kycApprovedRejected);
+
+
+
 
 module.exports = route; 
