@@ -16,6 +16,8 @@ route.post('/addUser',adminController.addUser);
 //kyc Approved or Rejected
 route.post('/kycApprovedRejected/:investmentId',adminController.kycApprovedRejected);
 
+//withdrow Approved or Rejected
+route.post('/withdrowApprovedRejected/:investmentId',adminController.withdrowApprovedRejected);
 
 
 

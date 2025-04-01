@@ -235,6 +235,14 @@ exports.kycApprovedRejected = async (req, res) => {
 
             // Store the payout date
             investment.roi_payout_dates = [firstPayoutDate.toDate()];
+             //roi_payout_status is updated correctly
+            investment.roi_payout_status = [
+                {
+                    payout_date: firstPayoutDate.toDate(),
+                    status: "Pending",
+                }
+            ];
+
 
 
             investment.roi_percentage = 10;
@@ -283,10 +291,54 @@ exports.kycApprovedRejected = async (req, res) => {
 //Withdrow Approved START
 exports.withdrowApprovedRejected = async (req, res) => {
     try {
-        
+        const { investmentId } = req.params;
+        const { status } = req.body; 
+
+        if (!investmentId || !status) {
+            return res.status(400).json({ Status: 'Error', message: 'Missing required parameters' });
+        }
+
+        const user = await users.findOne({'investment_info.roi_payout_status._id': investmentId });
+        if (!user) {
+            return res.status(404).json({ Status: 'Error', message: 'Investment not found' });
+        }
+       const userda = await users.find()
+
+         console.log("user",userda)
+
+        const investment = user.investment_info.id(investmentId);
+        if (!investment) {
+            return res.status(404).json({ Status: 'Error', message: 'Investment not found' });
+        }
+
+        // Find the latest "Pending" payout
+        const payoutIndex = investment.roi_payout_status.findIndex(p => p.status === "Pending");
+
+        if (payoutIndex === -1) {
+            return res.status(404).json({ Status: 'Error', message: 'No pending payouts found' });
+        }
+
+        // Update status
+        investment.roi_payout_status[payoutIndex].status = status;
+
+        if (status === "Approved") {
+            const investDuration = investment.invest_duration_in_month;
+            const lastPayoutDate = moment(investment.roi_payout_status[payoutIndex].payout_date);
+
+            // Add next month's payout if within the investment duration
+            let nextDate = lastPayoutDate.clone().add(1, 'month');
+            if (investment.roi_payout_status.length < investDuration) {
+                investment.roi_payout_status.push({ payout_date: nextDate.toDate(), status: "Pending" });
+            }
+        }
+
+        await user.save();
+
+        return res.status(200).json({ Status: 'Success', message: 'Payout status updated successfully', updatedInvestment: investment });
+
     } catch (error) {
-            console.error('Error:', error.message);
-            return res.status(500).json({ Status: 'Error', message: 'Something went wrong' });
+        console.error('Error:', error.message);
+        return res.status(500).json({ Status: 'Error', message: 'Something went wrong' });
     }
-}
+};
 //Withdrow Approved START

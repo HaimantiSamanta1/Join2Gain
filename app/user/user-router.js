@@ -14,7 +14,7 @@ route.post('/addNewMember',userController.addNewMember);
 //Login user
 route.post('/loginUser',userController.loginUser);
 //Get all user
-route.get('/getUsers',VerifyJwtToken,userController.getUsers);
+route.get('/getUsers',userController.getUsers);
 //Get Inactive members
 route.get('/getInactiveUsers',VerifyJwtToken,userController.getInactiveUsers);
 //Get a particuler user
@@ -41,7 +41,7 @@ route.get('/downloadBankPassbookFile/:filename',VerifyJwtToken,userController.do
 //Add TopUp
 route.post('/addTopUp/:userId',VerifyJwtToken,uploadTopUpProofFile.single('file'),userController.addTopUp);
 //Get a particuler user
-route.get('/getTopUp/:user_id',VerifyJwtToken,userController.getTopUp);
+route.get('/getTopUp/:user_id',userController.getTopUp);
 
 
 module.exports = route; 
