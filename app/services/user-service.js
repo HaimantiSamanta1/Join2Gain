@@ -91,7 +91,10 @@ async finduserAccountdetails(token) {
 //Read all user information START
 async getAllUserDetails() {
   try {
-  const result = await users.find().sort({ createdAt: -1 })
+  const result = await users.find()
+                            .sort({ createdAt: -1 })
+                            .populate('referrals') 
+                         
   return { Status: true, data: result }
   } catch (err) {
   console.log('Get task service err', err);
