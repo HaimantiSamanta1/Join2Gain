@@ -102,6 +102,25 @@ exports.addNewMember = async (req, res) => {
             password: password,           
         };      
         const response = await userService.createAccount(data);
+
+        // If a sponsor_id is provided, update the sponsor's level
+        if (user.user_profile_id) {
+            let sponsor = await users.findOne({ user_profile_id: user.user_profile_id });
+            if (sponsor) {
+                // Increase the sponsor's level
+                let currentLevel = sponsor.user_level;
+                const nextLevel = getNextLevel(currentLevel); // Increment the user level (e.g., "level 1" -> "level 2")
+                
+                // Update sponsor level
+                sponsor = await users.findByIdAndUpdate(sponsor._id, { user_level: nextLevel }, { new: true });
+
+                // Also update the parent sponsor's level (if any)
+                if (sponsor.sponsor_id) {
+                    await updateParentSponsorLevel(sponsor.sponsor_id); // Recursive update
+                }
+            }
+        }
+
         const referrals = await users.findByIdAndUpdate(
             user._id,
             { 
@@ -124,6 +143,34 @@ exports.addNewMember = async (req, res) => {
     } catch (err) {
         console.error(err);
         return res.status(500).json({ Status: false, message: 'Internal Server Error' });
+    }
+};
+
+
+// Helper function to get the next user level
+const getNextLevel = (currentLevel) => {
+    const levelMap = {
+        "level 1": "level 2",
+        "level 2": "level 3",
+        "level 3": "level 4",
+        "level 4": "level 5",
+    };
+
+    return levelMap[currentLevel] ; 
+};
+
+// Recursive function to update parent sponsor's level if applicable
+const updateParentSponsorLevel = async (sponsor_id) => {
+    let parentSponsor = await users.findOne({ user_profile_id: sponsor_id });
+    if (parentSponsor) {
+        let currentLevel = parentSponsor.user_level;
+        const nextLevel = getNextLevel(currentLevel);
+        
+        await users.findByIdAndUpdate(parentSponsor._id, { user_level: nextLevel }, { new: true });
+        
+        if (parentSponsor.sponsor_id) {
+            await updateParentSponsorLevel(parentSponsor.sponsor_id); // Recursively update the level of parent sponsors
+        }
     }
 };
 //Add New User Account END

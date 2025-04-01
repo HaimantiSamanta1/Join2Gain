@@ -102,21 +102,6 @@ async getAllUserDetails() {
 
 //Read a user information END
 async findAndGetUserAccount(user_id) {
-  // try {
-  // const result = await users.findById(user_id)
-  //                           .populate({
-  //                             path: 'referrals',
-  //                             populate: {
-  //                               path: 'referrals', 
-  //                               model: 'usermaster'
-  //                             } 
-  //                           });
-  // return { Status: true, data: result }
-  // } catch (err) {
-  // console.log('Get task service err', err);
-  // throw new Error()
-  // }
-
   try {
     async function populateReferrals(user) {
         if (!user.referrals || user.referrals.length === 0) return user;

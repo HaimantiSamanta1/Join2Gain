@@ -181,10 +181,10 @@ const userSchema = new Schema({
         type: Number,
         default: 0
     },
-    user_level:{
-        type:String,
-        default:" ",
-    },
+    // user_level:{
+    //     type:String,
+    //     default:" ",
+    // },
     uploaded_pan_file:{
         type:String,
         default:" ",   
