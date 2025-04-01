@@ -344,3 +344,38 @@ exports.withdrowApprovedRejected = async (req, res) => {
 };
 
 //Withdrow Approved START
+
+
+//Edit password START
+exports.editAdminPassword = async (req, res) => {
+    try {
+        let { admin_id } = req.params;
+        let { oldPassword, newPassword } = req.body;
+
+        if (!oldPassword || !newPassword) {
+            return res.status(400).json({ message: 'Both old and new passwords are required' });
+        }
+
+        // Find user by ID
+        const admin = await admins.findById(admin_id);
+        if (!admin) {
+            return res.status(404).json({ message: 'Admin not found' });
+        }
+
+        // Check if the old password matches the stored password
+        if (admin.password !== oldPassword) {
+            return res.status(400).json({ message: 'Old password is incorrect' });
+        }
+
+        // Update the password directly
+        admin.password = newPassword;
+        await admin.save();
+
+        res.status(200).json({ message: 'Password updated successfully' });
+
+    } catch (error) {
+        console.error('Error updating password:', error);
+        res.status(500).json({ message: 'Server Error' });
+    }
+}; 
+//Edit password END

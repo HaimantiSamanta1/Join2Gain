@@ -312,7 +312,7 @@ exports.getUser = async (req, res) => {
 //Get all user details START
 exports.getUsers = async (req, res) => {
     try {
-        let { token } = req.userData;
+       // let { token } = req.userData;
         const users = await userService.getAllUserDetails();
         res.status(200).json(users);
     } catch (error) {
@@ -655,7 +655,7 @@ exports.addTopUp = async (req, res) => {
 //Get top-up START
 exports.getTopUp = async (req, res) => {
     try {
-        let { token } = req.userData;
+       // let { token } = req.userData;
         let { user_id } = req.params;
         let data = await userService.findAndGetUserAccount(user_id)
         if (data) {

@@ -13,6 +13,9 @@ route.post('/loginAdmin',adminController.loginAdmin);
 //Register new user
 route.post('/addUser',adminController.addUser);
 
+//Login admin
+route.patch('/adminController/:admin_id',adminController.editAdminPassword);
+
 //kyc Approved or Rejected
 route.post('/kycApprovedRejected/:investmentId',adminController.kycApprovedRejected);
 
