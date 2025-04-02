@@ -249,7 +249,7 @@ exports.editUserPassword = async (req, res) => {
 //Edit user profile START
 exports.updateUserProfile = async (req, res) => {
     try {
-        let { token } = req.userData;
+      //  let { token } = req.userData;
         let { user_id } = req.params;
         const {gender,email,phone_no,date_of_birth,address,city,state,pincode,pan_number,aadhar_number,nominee_name,nominee_aadhar_number,nominee_relationship,bank_name,branch,ifsc,ac_number} = req.body;
           
@@ -293,85 +293,195 @@ exports.updateUserProfile = async (req, res) => {
 //Edit user profile END
 
 //Get a user details START
+
+// exports.getUser = async (req, res) => {
+//     try {
+//        // let { token } = req.userData;
+//         let { user_id } = req.params;
+//         let data = await userService.findAndGetUserAccount(user_id)
+//         // if (data) {
+//         //     return res.status(200).json({ Status: true, message: 'Get user account successful!', data })
+//         // } else {
+//         //     return res.status(404).send({ Status: false, message: 'Not Found User Account' })
+//         // }
+
+//         if (!data) {
+//             return res.status(404).json({ Status: false, message: 'Not Found User Account' });
+//         }
+
+//         console.log("data",data)
+
+//         data.data.referrals.forEach(referral => {
+//             console.log("Referral ID:", referral._id);
+//             console.log("Referral Investment Info:", referral.investment_info);
+            
+//             // Check if investment_info exists and has data
+//             if (referral.investment_info && referral.investment_info.length > 0) {
+//                 referral.investment_info.forEach(investment => {
+//                     console.log("Investment No:", investment.invest_no);
+//                     console.log("Investment Type:", investment.invest_type);
+//                     console.log("Investment Amount:", investment.invest_amount);
+//                     console.log("Investment kyc_status:", investment.kyc_status);
+//                 });
+//             } else {
+//                 console.log("No investment information available for this referral.");
+//             }
+//         });
+        
+//         let totalInvestmentAmount = 0;
+
+//         data.data.referrals.forEach(referral => {
+//             if (referral.investment_info && referral.investment_info.length > 0) {
+//                 referral.investment_info.forEach(investment => {
+//                 //    // totalInvestmentAmount += investment.invest_amount;
+//                 //    {
+//                 //     totalInvestmentAmount += investment.invest_amount;
+//                 //    }
+//                 if (investment.kyc_status && investment.kyc_status.toLowerCase() === "approved") {
+//                     totalInvestmentAmount += investment.invest_amount;
+//                 }
+//                 });
+//             }
+//         });
+
+//         console.log("Total Investment Amount from Referrals:", totalInvestmentAmount);
+//         console.log("no_of_direct_referrals",data.data.no_of_direct_referrals)
+
+//         // // Check if conditions are met
+//         // if (data.data.no_of_direct_referrals >= 2 && totalInvestmentAmount >= 500000) {
+//         //     // Update user rank to "Silver"
+//         //     await users.updateOne({ _id: user_id }, { $set: { user_rank: "Silver" } });
+//         //     data.user_rank = "Silver"; 
+//         //     console.log("User rank updated to Silver.");
+//         // }
+
+//         let updated = false;
+
+//         if (data.data.no_of_direct_referrals >= 2 && totalInvestmentAmount >= 500000) {
+//             await users.updateOne({ _id: user_id }, { $set: { user_rank: "Silver" } });
+//             updated = true;
+//             console.log("User rank updated to Silver.");
+//         }
+
+//         // Fetch updated user data if update was performed
+//         if (updated) {
+//             data = await userService.findAndGetUserAccount(user_id);
+//         }
+
+//         return res.status(200).json({ Status: true, message: 'Get user account successful!', data });
+//     } catch (error) {
+//         res.status(500).json({ message: 'Server Error' });
+//     }
+// };
+
 exports.getUser = async (req, res) => {
     try {
-       // let { token } = req.userData;
         let { user_id } = req.params;
-        let data = await userService.findAndGetUserAccount(user_id)
-        // if (data) {
-        //     return res.status(200).json({ Status: true, message: 'Get user account successful!', data })
-        // } else {
-        //     return res.status(404).send({ Status: false, message: 'Not Found User Account' })
-        // }
+        let data = await userService.findAndGetUserAccount(user_id);
 
         if (!data) {
-            return res.status(404).json({ Status: false, message: 'Not Found User Account' });
+            return res.status(404).json({ Status: false, message: 'User Account Not Found' });
         }
 
-        console.log("data",data)
+        console.log("User Data:", data);
 
-        data.data.referrals.forEach(referral => {
-            console.log("Referral ID:", referral._id);
-            console.log("Referral Investment Info:", referral.investment_info);
-            
-            // Check if investment_info exists and has data
-            if (referral.investment_info && referral.investment_info.length > 0) {
-                referral.investment_info.forEach(investment => {
-                    console.log("Investment No:", investment.invest_no);
-                    console.log("Investment Type:", investment.invest_type);
-                    console.log("Investment Amount:", investment.invest_amount);
-                    console.log("Investment kyc_status:", investment.kyc_status);
-                });
-            } else {
-                console.log("No investment information available for this referral.");
-            }
-        });
-        
         let totalInvestmentAmount = 0;
 
-        data.data.referrals.forEach(referral => {
-            if (referral.investment_info && referral.investment_info.length > 0) {
-                referral.investment_info.forEach(investment => {
-                //    // totalInvestmentAmount += investment.invest_amount;
-                //    {
-                //     totalInvestmentAmount += investment.invest_amount;
-                //    }
-                if (investment.kyc_status && investment.kyc_status.toLowerCase() === "approved") {
-                    totalInvestmentAmount += investment.invest_amount;
+        // Process referrals to calculate total investment amount
+        if (data.data.referrals && data.data.referrals.length > 0) {
+            data.data.referrals.forEach(referral => {
+                if (referral.investment_info && referral.investment_info.length > 0) {
+                    referral.investment_info.forEach(investment => {
+                        if (investment.kyc_status && investment.kyc_status.toLowerCase() === "approved") {
+                            totalInvestmentAmount += investment.invest_amount;
+                        }
+                    });
                 }
-                });
+            });
+        }
+
+        console.log("Total Investment Amount from Referrals:", totalInvestmentAmount);
+        console.log("Number of Direct Referrals:", data.data.no_of_direct_referrals);
+
+        let userRank = data.data.user_rank ; 
+        console.log('user_rank_info',data.data.user_rank_info)
+        let referralIncomePercentage = 0;
+        let updated = false;
+
+        // Determine rank & referral income percentage
+        if (data.data.no_of_direct_referrals >= 14 && totalInvestmentAmount >= 3000000) {
+            userRank = "Diamond";
+            referralIncomePercentage = 0.25;
+        } else if (data.data.no_of_direct_referrals >= 10 && totalInvestmentAmount >= 2000000) {
+            userRank = "Platinum";
+            referralIncomePercentage = 0.5;
+        } else if (data.data.no_of_direct_referrals >= 5 && totalInvestmentAmount >= 1000000) {
+            userRank = "Gold";
+            referralIncomePercentage = 1;
+        } else if (data.data.no_of_direct_referrals >= 2 && totalInvestmentAmount >= 500000) {
+            userRank = "Silver";
+            referralIncomePercentage = 2;
+        } else if (data.data.no_of_direct_referrals >= 1) {
+            userRank = "Bronze";
+            referralIncomePercentage = 3;
+        }
+
+        let referralIncome = (totalInvestmentAmount * referralIncomePercentage) / 100;
+        let rankUpdateDate = moment().format("YYYY-MM-DD");
+
+        let payoutDate;
+        let dayOfMonth = moment().date();
+
+        if (dayOfMonth >= 1 && dayOfMonth <= 10) {
+            payoutDate = moment().add(1, 'months').date(11).format("YYYY-MM-DD");
+        } else if (dayOfMonth >= 11 && dayOfMonth <= 20) {
+            payoutDate = moment().add(1, 'months').date(21).format("YYYY-MM-DD");
+        } else {
+            payoutDate = moment().add(2, 'months').date(2).format("YYYY-MM-DD");
+        }
+
+        console.log("New Rank:", userRank);
+        console.log("Referral Income:", referralIncome);
+        console.log("Rank Update Date:", rankUpdateDate);
+        console.log("Payout Date:", payoutDate);
+
+        // Update user rank, rank update date, referral income, and payout date
+        await users.updateOne({ _id: user_id }, {
+            $set: {
+                user_rank_info: {
+                    rank_of_user: userRank,
+                    rank_update_date: rankUpdateDate,
+                    payout_date: payoutDate,
+                },
+                referral_payouts:{
+                    payout_date:payoutDate,
+                    amount:referralIncome
+                }
             }
         });
 
-        console.log("Total Investment Amount from Referrals:", totalInvestmentAmount);
-        console.log("no_of_direct_referrals",data.data.no_of_direct_referrals)
+       
+        // Fetch updated user data
+        data = await userService.findAndGetUserAccount(user_id);
 
-        // // Check if conditions are met
-        // if (data.data.no_of_direct_referrals >= 2 && totalInvestmentAmount >= 500000) {
-        //     // Update user rank to "Silver"
-        //     await users.updateOne({ _id: user_id }, { $set: { user_rank: "Silver" } });
-        //     data.user_rank = "Silver"; 
-        //     console.log("User rank updated to Silver.");
-        // }
+        return res.status(200).json({
+            Status: true,
+            message: 'Get user account successful!',
+            user_rank: userRank,
+            total_referral_investment: totalInvestmentAmount,
+            referral_income: referralIncome,
+            rank_update_date: rankUpdateDate,
+            payout_date: payoutDate,
+            data
+        });
 
-        let updated = false;
-
-        if (data.data.no_of_direct_referrals >= 2 && totalInvestmentAmount >= 500000) {
-            await users.updateOne({ _id: user_id }, { $set: { user_rank: "Silver" } });
-            updated = true;
-            console.log("User rank updated to Silver.");
-        }
-
-        // Fetch updated user data if update was performed
-        if (updated) {
-            data = await userService.findAndGetUserAccount(user_id);
-        }
-
-        return res.status(200).json({ Status: true, message: 'Get user account successful!', data });
     } catch (error) {
-        res.status(500).json({ message: 'Server Error' });
+        console.error("Error in getUser:", error);
+        return res.status(500).json({ Status: false, message: 'Server Error', error: error.message });
     }
 };
+
+
 //Get a user details END
 
 //Get all user details START

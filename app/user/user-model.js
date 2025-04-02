@@ -101,10 +101,45 @@ const userSchema = new Schema({
         type: Number,
         default: " " 
     },
-    user_rank:{
-        type: String,
-        default: " " 
+    // user_rank:{
+    //     type: String,
+    //     default: " " 
+    // },
+    referral_income: { 
+        type: Number, 
+        default: 0 
     },
+    referral_payouts: [{
+        payout_date: { type: Date, default: null },
+        amount: { type: Number, default: 0 },
+        status: { type: String, default: "Pending" }  // Pending, Approved, Rejected
+    }],
+    user_rank_info:[{
+        rank_of_user:{
+            type: String,
+            default: " " 
+        },
+        rank_update_date:{
+            type: Date,
+            default:null,
+            validate: {
+                validator: function (date) {
+                    return !date || moment(date).isValid();
+                },
+                message: 'Invalid date format for date of rank update date !',
+            },
+        },
+        payout_date: { 
+            type: Date,
+            default:null,
+            validate: {
+                validator: function (date) {
+                    return !date || moment(date).isValid();
+                },
+                message: 'Invalid date format for date of rank update date !',
+            },
+        }
+    }],
     user_level:{
         type: String,
         default: "level 1"

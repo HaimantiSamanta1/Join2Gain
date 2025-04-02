@@ -22,7 +22,7 @@ route.get('/getUser/:user_id',userController.getUser);
 //Edit user password
 route.patch('/editUserPassword/:user_id',VerifyJwtToken,userController.editUserPassword);
 //Edit user profile
-route.put('/updateUserProfile/:user_id',VerifyJwtToken,userController.updateUserProfile);
+route.put('/updateUserProfile/:user_id',userController.updateUserProfile);
 
 //Upload file of PAN
 route.patch('/addPanCardFile/:_id',VerifyJwtToken,uploadPanCardFile.single('file'),userController.addPanCardFile);
