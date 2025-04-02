@@ -332,8 +332,11 @@ exports.getUser = async (req, res) => {
         data.data.referrals.forEach(referral => {
             if (referral.investment_info && referral.investment_info.length > 0) {
                 referral.investment_info.forEach(investment => {
-                   // totalInvestmentAmount += investment.invest_amount;
-                   if (investment.kyc_status === "Approved" || investment.kyc_status === "approved") {
+                //    // totalInvestmentAmount += investment.invest_amount;
+                //    {
+                //     totalInvestmentAmount += investment.invest_amount;
+                //    }
+                if (investment.kyc_status && investment.kyc_status.toLowerCase() === "approved") {
                     totalInvestmentAmount += investment.invest_amount;
                 }
                 });

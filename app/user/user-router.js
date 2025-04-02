@@ -18,7 +18,7 @@ route.get('/getUsers',userController.getUsers);
 //Get Inactive members
 route.get('/getInactiveUsers',VerifyJwtToken,userController.getInactiveUsers);
 //Get a particuler user
-route.get('/getUser/:user_id',VerifyJwtToken,userController.getUser);
+route.get('/getUser/:user_id',userController.getUser);
 //Edit user password
 route.patch('/editUserPassword/:user_id',VerifyJwtToken,userController.editUserPassword);
 //Edit user profile
