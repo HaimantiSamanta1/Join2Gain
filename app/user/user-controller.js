@@ -150,6 +150,7 @@ exports.addNewMember = async (req, res) => {
 // Helper function to get the next user level
 const getNextLevel = (currentLevel) => {
     const levelMap = {
+        "level 0":"level 1",
         "level 1": "level 2",
         "level 2": "level 3",
         "level 3": "level 4",
@@ -374,55 +375,278 @@ exports.updateUserProfile = async (req, res) => {
 //     }
 // };
 
+// exports.getUser = async (req, res) => {
+//     try {
+//         let { user_id } = req.params;
+//         let data = await userService.findAndGetUserAccount(user_id);
+
+//         if (!data) {
+//             return res.status(404).json({ Status: false, message: 'User Account Not Found' });
+//         }
+
+//         console.log("User Data:", data);
+
+//         // let totalInvestmentAmount = 0;
+
+//         // // Process referrals to calculate total investment amount
+//         // if (data.data.referrals && data.data.referrals.length > 0) {
+//         //     data.data.referrals.forEach(referral => {
+//         //         if (referral.investment_info && referral.investment_info.length > 0) {
+//         //             referral.investment_info.forEach(investment => {
+//         //                 if (investment.investment_status && investment.investment_status.toLowerCase() === "approved") {
+//         //                     totalInvestmentAmount += investment.invest_amount;
+//         //                 }
+//         //             });
+//         //         }
+//         //     });
+//         // }
+
+//         // console.log("Total Investment Amount from Referrals:", totalInvestmentAmount);
+
+//         let totalInvestmentAmount = 0;
+//         let currentDate = moment(); 
+//         let referrals = data?.data?.referrals ?? []; // Use optional chaining and default value
+//        // let no_of_direct_referrals = data?.data?.no_of_direct_referrals ?? 0; 
+
+//         // // if (data.data.referrals && data.data.referrals.length > 0) {
+//         //  if (data && data.data && data.data.referrals && Array.isArray(data.data.referrals) && data.data.referrals.length > 0) {
+
+//         //     data.data.referrals.forEach(referral => {
+//         //         if (referral.investment_info && referral.investment_info.length > 0) {
+//         //             referral.investment_info.forEach(investment => {
+//         //                 if (
+//         //                     investment.investment_status &&
+//         //                     investment.investment_status.toLowerCase() === "approved" &&
+//         //                     investment.invest_confirm_date &&
+//         //                     investment.invest_duration_in_month > 0
+//         //                 ) {
+//         //                     let investConfirmDate = moment(investment.invest_confirm_date);
+//         //                     let durationInMonths = investment.invest_duration_in_month;
+
+//         //                     let activeUntil;
+
+//         //                     let day = investConfirmDate.date();
+//         //                     let investStartDate;
+
+//         //                     if (day >= 1 && day <= 10) {
+//         //                         investStartDate = investConfirmDate.clone().add(1, 'months').date(10);
+//         //                     } else if (day >= 11 && day <= 20) {
+//         //                         investStartDate = investConfirmDate.clone().add(1, 'months').date(10);
+//         //                     } else {
+//         //                         investStartDate = investConfirmDate.clone().add(2, 'months').date(1);
+//         //                     }
+
+//         //                     activeUntil = investStartDate.clone().add(durationInMonths, 'months');
+
+//         //                     // If the investment is still active, add to totalInvestmentAmount
+//         //                     if (currentDate.isBefore(activeUntil)) {
+//         //                         totalInvestmentAmount += investment.invest_amount;
+//         //                     }
+//         //                 }
+//         //             });
+//         //         }
+//         //     });
+//         // }
+
+//         // console.log("Total Active Investment Amount from Referrals:", totalInvestmentAmount);
+
+//         if (Array.isArray(referrals) && referrals.length > 0) {
+//             referrals.forEach(referral => {
+//                 let investments = referral?.investment_info ?? []; // Safe check
+//                 investments.forEach(investment => {
+//                     if (
+//                         investment?.investment_status?.toLowerCase() === "approved" &&
+//                         investment?.invest_confirm_date &&
+//                         investment?.invest_duration_in_month > 0
+//                     ) {
+//                         let investConfirmDate = moment(investment.invest_confirm_date);
+//                         let durationInMonths = investment.invest_duration_in_month;
+
+//                         let activeUntil;
+
+//                         let day = investConfirmDate.date();
+//                         let investStartDate;
+
+//                         if (day >= 1 && day <= 10) {
+//                             investStartDate = investConfirmDate.clone().add(1, 'months').date(10);
+//                         } else if (day >= 11 && day <= 20) {
+//                             investStartDate = investConfirmDate.clone().add(1, 'months').date(10);
+//                         } else {
+//                             investStartDate = investConfirmDate.clone().add(2, 'months').date(1);
+//                         }
+
+//                         activeUntil = investStartDate.clone().add(durationInMonths, 'months');
+
+//                         // If the investment is still active, add to totalInvestmentAmount
+//                         if (currentDate.isBefore(activeUntil)) {
+//                             totalInvestmentAmount += investment?.invest_amount ?? 0; // Safe check
+//                         }
+//                     }
+//                 });
+//             });
+//         }
+
+//         console.log("Total Active Investment Amount from Referrals:", totalInvestmentAmount);
+
+//         let referralIncomePercentage = 0;
+//         let userRank = "New";
+
+
+
+
+//        // console.log("Number of Direct Referrals:", data.data.no_of_direct_referrals);
+
+//        // let userRank = data.data.user_rank_info ; 
+//        // console.log('user_rank_info',data.data.user_rank_info)
+//        // let referralIncomePercentage = 0;
+//         let updated = false;
+
+//         let no_of_direct_referrals = data.data.no_of_direct_referrals || 0;
+
+//         // Determine rank & referral income percentage
+//         if (data.data.no_of_direct_referrals >= 14 && totalInvestmentAmount >= 3000000) {
+//             userRank = "Diamond";
+//             referralIncomePercentage = 0.25;
+//         } else if (data.data.no_of_direct_referrals >= 10 && totalInvestmentAmount >= 2000000) {
+//             userRank = "Platinum";
+//             referralIncomePercentage = 0.5;
+//         } else if (data.data.no_of_direct_referrals >= 5 && totalInvestmentAmount >= 1000000) {
+//             userRank = "Gold";
+//             referralIncomePercentage = 1;
+//         } else if (data.data.no_of_direct_referrals >= 2 && totalInvestmentAmount >= 500000) {
+//             userRank = "Silver";
+//             referralIncomePercentage = 2;
+//         } else if (data.data.no_of_direct_referrals >= 1) {
+//             userRank = "New";
+//             referralIncomePercentage = 3;
+//         }
+
+//         let referralIncome = (totalInvestmentAmount * referralIncomePercentage) / 100;
+//         let rankUpdateDate = moment().format("YYYY-MM-DD");
+
+//         let payoutDate;
+//         let dayOfMonth = moment().date();
+
+//         if (dayOfMonth >= 1 && dayOfMonth <= 10) {
+//             payoutDate = moment().add(1, 'months').date(11).format("YYYY-MM-DD");
+//         } else if (dayOfMonth >= 11 && dayOfMonth <= 20) {
+//             payoutDate = moment().add(1, 'months').date(21).format("YYYY-MM-DD");
+//         } else {
+//             payoutDate = moment().add(2, 'months').date(2).format("YYYY-MM-DD");
+//         }
+
+//         console.log("New Rank:", userRank);
+//         console.log("Referral Income:", referralIncome);
+//         console.log("Rank Update Date:", rankUpdateDate);
+//         console.log("Payout Date:", payoutDate);
+
+//         // Update user rank, rank update date, referral income, and payout date
+//         await users.updateOne({ _id: user_id }, {
+//             $set: {
+//                 user_rank_info: {
+//                     rank_of_user: userRank,
+//                     rank_update_date: rankUpdateDate,
+//                     payout_date: payoutDate,
+//                 },
+//                 referral_payouts:{
+//                     payout_date:payoutDate,
+//                     amount:referralIncome
+//                 }
+//             }
+//         });
+
+       
+//         // Fetch updated user data
+//         data = await userService.findAndGetUserAccount(user_id);
+
+//         return res.status(200).json({
+//             Status: true,
+//             message: 'Get user account successful!',
+//             user_rank: userRank,
+//             total_referral_investment: totalInvestmentAmount,
+//             referral_income: referralIncome,
+//             rank_update_date: rankUpdateDate,
+//             payout_date: payoutDate,
+//             data
+//         });
+
+//     } catch (error) {
+//         console.error("Error in getUser:", error);
+//         return res.status(500).json({ Status: false, message: 'Server Error', error: error.message });
+//     }
+// };
+
+
 exports.getUser = async (req, res) => {
     try {
         let { user_id } = req.params;
         let data = await userService.findAndGetUserAccount(user_id);
 
-        if (!data) {
+        if (!data || !data.data) {
             return res.status(404).json({ Status: false, message: 'User Account Not Found' });
         }
 
         console.log("User Data:", data);
 
         let totalInvestmentAmount = 0;
+        let currentDate = moment();
 
-        // Process referrals to calculate total investment amount
-        if (data.data.referrals && data.data.referrals.length > 0) {
+        if (Array.isArray(data.data.referrals) && data.data.referrals.length > 0) {
             data.data.referrals.forEach(referral => {
-                if (referral.investment_info && referral.investment_info.length > 0) {
+                if (Array.isArray(referral.investment_info) && referral.investment_info.length > 0) {
                     referral.investment_info.forEach(investment => {
-                        if (investment.kyc_status && investment.kyc_status.toLowerCase() === "approved") {
-                            totalInvestmentAmount += investment.invest_amount;
+                        if (
+                            investment.investment_status &&
+                            investment.investment_status.toLowerCase() === "approved" &&
+                            investment.invest_confirm_date &&
+                            investment.invest_duration_in_month > 0
+                        ) {
+                            let investConfirmDate = moment(investment.invest_confirm_date);
+                            let durationInMonths = investment.invest_duration_in_month;
+
+                            let investStartDate;
+                            let day = investConfirmDate.date();
+
+                            if (day >= 1 && day <= 10) {
+                                investStartDate = investConfirmDate.clone().add(1, 'months').date(10);
+                            } else if (day >= 11 && day <= 20) {
+                                investStartDate = investConfirmDate.clone().add(1, 'months').date(10);
+                            } else {
+                                investStartDate = investConfirmDate.clone().add(2, 'months').date(1);
+                            }
+
+                            let activeUntil = investStartDate.clone().add(durationInMonths, 'months');
+
+                            if (currentDate.isBefore(activeUntil)) {
+                                totalInvestmentAmount += investment.invest_amount;
+                            }
                         }
                     });
                 }
             });
         }
 
-        console.log("Total Investment Amount from Referrals:", totalInvestmentAmount);
-        console.log("Number of Direct Referrals:", data.data.no_of_direct_referrals);
+        console.log("Total Active Investment Amount from Referrals:", totalInvestmentAmount);
 
-        let userRank = data.data.user_rank ; 
-        console.log('user_rank_info',data.data.user_rank_info)
         let referralIncomePercentage = 0;
-        let updated = false;
+        let userRank = "Unranked"; // Default rank
 
-        // Determine rank & referral income percentage
-        if (data.data.no_of_direct_referrals >= 14 && totalInvestmentAmount >= 3000000) {
+        let no_of_direct_referrals = data.data.no_of_direct_referrals || 0;
+
+        if (no_of_direct_referrals >= 14 && totalInvestmentAmount >= 3000000) {
             userRank = "Diamond";
             referralIncomePercentage = 0.25;
-        } else if (data.data.no_of_direct_referrals >= 10 && totalInvestmentAmount >= 2000000) {
+        } else if (no_of_direct_referrals >= 10 && totalInvestmentAmount >= 2000000) {
             userRank = "Platinum";
             referralIncomePercentage = 0.5;
-        } else if (data.data.no_of_direct_referrals >= 5 && totalInvestmentAmount >= 1000000) {
+        } else if (no_of_direct_referrals >= 5 && totalInvestmentAmount >= 1000000) {
             userRank = "Gold";
             referralIncomePercentage = 1;
-        } else if (data.data.no_of_direct_referrals >= 2 && totalInvestmentAmount >= 500000) {
+        } else if (no_of_direct_referrals >= 2 && totalInvestmentAmount >= 500000) {
             userRank = "Silver";
             referralIncomePercentage = 2;
-        } else if (data.data.no_of_direct_referrals >= 1) {
-            userRank = "Bronze";
+        } else if (no_of_direct_referrals >= 1) {
+            userRank = "Default";
             referralIncomePercentage = 3;
         }
 
@@ -445,7 +669,7 @@ exports.getUser = async (req, res) => {
         console.log("Rank Update Date:", rankUpdateDate);
         console.log("Payout Date:", payoutDate);
 
-        // Update user rank, rank update date, referral income, and payout date
+        // Update user rank and referral income
         await users.updateOne({ _id: user_id }, {
             $set: {
                 user_rank_info: {
@@ -453,25 +677,24 @@ exports.getUser = async (req, res) => {
                     rank_update_date: rankUpdateDate,
                     payout_date: payoutDate,
                 },
-                referral_payouts:{
-                    payout_date:payoutDate,
-                    amount:referralIncome
+                referral_payouts: {
+                    payout_date: payoutDate,
+                    amount: referralIncome
                 }
             }
         });
 
-       
         // Fetch updated user data
         data = await userService.findAndGetUserAccount(user_id);
 
         return res.status(200).json({
             Status: true,
             message: 'Get user account successful!',
-            user_rank: userRank,
-            total_referral_investment: totalInvestmentAmount,
-            referral_income: referralIncome,
-            rank_update_date: rankUpdateDate,
-            payout_date: payoutDate,
+            // user_rank: userRank,
+            // total_referral_investment: totalInvestmentAmount,
+            // referral_income: referralIncome,
+            // rank_update_date: rankUpdateDate,
+            // payout_date: payoutDate,
             data
         });
 
@@ -480,7 +703,6 @@ exports.getUser = async (req, res) => {
         return res.status(500).json({ Status: false, message: 'Server Error', error: error.message });
     }
 };
-
 
 //Get a user details END
 

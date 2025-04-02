@@ -142,7 +142,7 @@ const userSchema = new Schema({
     }],
     user_level:{
         type: String,
-        default: "level 1"
+        default: "level 0"
     },
     investment_info: [{
         invest_no: { type: Number, default: 0},
@@ -193,7 +193,7 @@ const userSchema = new Schema({
         sc_deduction_amount: { type: Number, default: 0 },
         profit_amount_after_tds_sc_deduction: { type: Number,default: 0 },
         net_amount_per_month: { type: Number,default: 0 },
-        remarks: { type: String,default: " " },
+       // remarks: { type: String,default: " " },
         investment_status:{type: String,default: " "},
         roi_payout_status: [{
             payout_date: { type: Date, default: null },

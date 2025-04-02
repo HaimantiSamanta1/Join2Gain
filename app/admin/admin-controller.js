@@ -279,7 +279,7 @@ exports.addTopUPApprovedRejected = async (req, res) => {
 
         await user.save();
 
-        return res.status(200).json({ Status: 'Success', message: 'KYC status updated successfully', user });
+        return res.status(200).json({ Status: 'Success', message: 'Investment status updated successfully', user });
 
     } catch (error) {
         console.error('Error:', error.message);

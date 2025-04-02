@@ -26,6 +26,4 @@ route.post('/withdrowApprovedRejected/',adminController.withdrowApprovedRejected
 route.post('/kycApprovedRejected/:UserId',adminController.kycApprovedRejected);
 
 
-
-
 module.exports = route; 
