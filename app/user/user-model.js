@@ -194,7 +194,7 @@ const userSchema = new Schema({
         profit_amount_after_tds_sc_deduction: { type: Number,default: 0 },
         net_amount_per_month: { type: Number,default: 0 },
         remarks: { type: String,default: " " },
-        kyc_status:{type: String,default: " "},
+        investment_status:{type: String,default: " "},
         roi_payout_status: [{
             payout_date: { type: Date, default: null },
             status: { type: String, default: "Pending" }  // Pending, Approved, Rejected
@@ -239,6 +239,10 @@ const userSchema = new Schema({
             }
             return ;
         },
+    },
+    kyc_status:{
+        type:String,
+        default:" ",  
     },
     tokens: [{
         type: mongoose.Schema.Types.ObjectId,

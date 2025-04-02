@@ -864,3 +864,27 @@ exports.getInactiveUsers = async (req, res) => {
 };
 //Get Inactive user details END
 
+
+//
+exports.getAllUsersTopUp = async (req, res) => {
+    try {
+        let data = await userService.findAndGetAllUsersTopUp();
+        
+        if (data.Status) {
+            return res.status(200).json({
+                Status: true,
+                message: 'Get all users Top-Up details successful!',
+                users: data.data,
+            });
+        } else {
+            return res.status(404).json({ Status: false, message: 'No user data found' });
+        }
+  
+    } catch (error) {
+        console.error("Error getting all users' investment details:", error);
+        res.status(500).json({ error: "Internal server error." });
+    }
+};
+
+//
+

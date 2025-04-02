@@ -40,8 +40,12 @@ route.get('/downloadBankPassbookFile/:filename',VerifyJwtToken,userController.do
 
 //Add TopUp
 route.post('/addTopUp/:userId',VerifyJwtToken,uploadTopUpProofFile.single('file'),userController.addTopUp);
-//Get a particuler user
+//Get TopUp of a particuler user
 route.get('/getTopUp/:user_id',userController.getTopUp);
+
+//Get top up for all user
+route.get('/getAllUsersTopUp',userController.getAllUsersTopUp);
+
 
 
 module.exports = route; 

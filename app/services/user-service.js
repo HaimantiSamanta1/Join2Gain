@@ -129,9 +129,26 @@ async findAndGetUserAccount(user_id) {
     throw new Error(err);
 }
 }
-
-
 //Read a user information END
+
+//
+async findAndGetAllUsersTopUp() {
+  try {
+      let usersList = await users.find({}, 'name email investment_info').lean();
+
+      if (!usersList || usersList.length === 0) {
+          return { Status: false, message: "No users found" };
+      }
+
+      return { Status: true, data: usersList };
+
+  } catch (err) {
+      console.log('Error fetching all users top-up:', err);
+      throw new Error(err);
+  }
+}
+
+//
 
 //Update task SRART
 async updateUserInfo(id,data) {

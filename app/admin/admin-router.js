@@ -16,11 +16,15 @@ route.post('/addUser',adminController.addUser);
 //edit admin Password 
 route.patch('/editAdminPassword/:admin_id',adminController.editAdminPassword);
 
-//kyc Approved or Rejected
-route.post('/kycApprovedRejected/:investmentId',adminController.kycApprovedRejected);
+//Add top up Approved or Rejected
+route.post('/addTopUPApprovedRejected/:investmentId',adminController.addTopUPApprovedRejected);
 
 //withdrow Approved or Rejected
 route.post('/withdrowApprovedRejected/',adminController.withdrowApprovedRejected);
+
+//KYC Approved or Rejected
+route.post('/kycApprovedRejected/:UserId',adminController.kycApprovedRejected);
+
 
 
 

@@ -188,18 +188,18 @@ exports.loginAdmin = async (req, res) => {
 }
 //Admin login END
 
-//Approved kyc START
-exports.kycApprovedRejected = async (req, res) => {
+//Approved add top up  START
+exports.addTopUPApprovedRejected = async (req, res) => {
     try {
         const { investmentId } = req.params;
-        const { kyc_status } = req.body;
+        const { investment_status } = req.body;
 
         if (!investmentId) {
             return res.status(400).json({ Status: 'Error', message: 'Investment ID is required' });
         }
 
-        if (!kyc_status) {
-            return res.status(400).json({ Status: 'Error', message: 'KYC Status is required' });
+        if (!investment_status) {
+            return res.status(400).json({ Status: 'Error', message: 'Investment Status is required' });
         }
 
         // Find the user who has this investment ID
@@ -216,9 +216,9 @@ exports.kycApprovedRejected = async (req, res) => {
         }
 
         // Update fields based on KYC status
-        investment.kyc_status = kyc_status;
+        investment.investment_status = investment_status;
 
-        if (kyc_status.toLowerCase() === 'approved') {
+        if (investment_status.toLowerCase() === 'approved') {
             user.user_status = 'Active';
             const currentDate = moment();
             investment.invest_confirm_date = moment().toDate();
@@ -286,7 +286,7 @@ exports.kycApprovedRejected = async (req, res) => {
         return res.status(500).json({ Status: 'Error', message: 'Something went wrong' });
     }
 };
-//Approved kyc END
+//Approved addtop up END
 
 //Withdrow Approved START
 exports.withdrowApprovedRejected = async (req, res) => {
@@ -379,3 +379,38 @@ exports.editAdminPassword = async (req, res) => {
     }
 }; 
 //Edit password END
+
+//Approved kyc START
+exports.kycApprovedRejected = async (req, res) => {
+    try {
+        const { UserId } = req.params;
+        const { kyc_status } = req.body;
+         
+         // Validate input
+         if (!["Approved", "Rejected", "Pending"].includes(kyc_status)) {
+            return res.status(400).json({ message: "Invalid KYC status" });
+        }
+
+        // Find and update the user's KYC status
+        const updatedUser = await users.findByIdAndUpdate(
+            UserId,
+            { kyc_status },
+            { new: true }
+        );
+
+        if (!updatedUser) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        return res.status(200).json({
+            message: `KYC status updated to ${kyc_status}`,
+            user: updatedUser,
+        });
+
+
+    } catch (error) {
+        console.error('Error updating password:', error);
+        res.status(500).json({ message: 'Server Error' });
+    }
+}; 
+//Approved kyc END
