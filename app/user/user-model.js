@@ -85,10 +85,6 @@ const userSchema = new Schema({
         type: String,
         default: "Inactive"
     },
-    // password:{
-    //     type: String,
-    //     default: " "
-    // },
     bank_name:{
         type: String,
         default: " "
@@ -153,7 +149,6 @@ const userSchema = new Schema({
          },
 
         invest_duration_in_month: { type: Number,default: 0 }, 
-
         roi_percentage: { type: Number ,default:0},
         capital_amount: { type: Number,default: 0},
         profit_amount: { type: Number, default: 0},
@@ -165,7 +160,6 @@ const userSchema = new Schema({
         net_amount_per_month: { type: Number,default: 0 },
         remarks: { type: String,default: " " },
         kyc_status:{type: String,default: " "},
-        // roi_payout_dates:[{ type: Date, default: null }]
         roi_payout_status: [{
             payout_date: { type: Date, default: null },
             status: { type: String, default: "Pending" }  // Pending, Approved, Rejected
@@ -181,10 +175,6 @@ const userSchema = new Schema({
         type: Number,
         default: 0
     },
-    // user_level:{
-    //     type:String,
-    //     default:" ",
-    // },
     uploaded_pan_file:{
         type:String,
         default:" ",   

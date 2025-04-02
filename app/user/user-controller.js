@@ -34,9 +34,9 @@ exports.addNewMember = async (req, res) => {
         }
         const user = await userService.finduserAccountdetails(accessToken);
         console.log("User",user);
-        console.log("Login user name",user.name);
-        console.log("Login user profile id",user.user_profile_id)
-        console.log("Login user id",user._id);
+        //console.log("Login user name",user.name);
+        // console.log("Login user profile id",user.user_profile_id)
+        // console.log("Login user id",user._id);
         if (!user) {
             return res.status(401).json({
                 success: false,
@@ -295,14 +295,76 @@ exports.updateUserProfile = async (req, res) => {
 //Get a user details START
 exports.getUser = async (req, res) => {
     try {
-        let { token } = req.userData;
+       // let { token } = req.userData;
         let { user_id } = req.params;
         let data = await userService.findAndGetUserAccount(user_id)
-        if (data) {
-            return res.status(200).json({ Status: true, message: 'Get user account successful!', data })
-        } else {
-            return res.status(404).send({ Status: false, message: 'Not Found User Account' })
+        // if (data) {
+        //     return res.status(200).json({ Status: true, message: 'Get user account successful!', data })
+        // } else {
+        //     return res.status(404).send({ Status: false, message: 'Not Found User Account' })
+        // }
+
+        if (!data) {
+            return res.status(404).json({ Status: false, message: 'Not Found User Account' });
         }
+
+        console.log("data",data)
+
+        data.data.referrals.forEach(referral => {
+            console.log("Referral ID:", referral._id);
+            console.log("Referral Investment Info:", referral.investment_info);
+            
+            // Check if investment_info exists and has data
+            if (referral.investment_info && referral.investment_info.length > 0) {
+                referral.investment_info.forEach(investment => {
+                    console.log("Investment No:", investment.invest_no);
+                    console.log("Investment Type:", investment.invest_type);
+                    console.log("Investment Amount:", investment.invest_amount);
+                    console.log("Investment kyc_status:", investment.kyc_status);
+                });
+            } else {
+                console.log("No investment information available for this referral.");
+            }
+        });
+        
+        let totalInvestmentAmount = 0;
+
+        data.data.referrals.forEach(referral => {
+            if (referral.investment_info && referral.investment_info.length > 0) {
+                referral.investment_info.forEach(investment => {
+                   // totalInvestmentAmount += investment.invest_amount;
+                   if (investment.kyc_status === "Approved" || investment.kyc_status === "approved") {
+                    totalInvestmentAmount += investment.invest_amount;
+                }
+                });
+            }
+        });
+
+        console.log("Total Investment Amount from Referrals:", totalInvestmentAmount);
+        console.log("no_of_direct_referrals",data.data.no_of_direct_referrals)
+
+        // // Check if conditions are met
+        // if (data.data.no_of_direct_referrals >= 2 && totalInvestmentAmount >= 500000) {
+        //     // Update user rank to "Silver"
+        //     await users.updateOne({ _id: user_id }, { $set: { user_rank: "Silver" } });
+        //     data.user_rank = "Silver"; 
+        //     console.log("User rank updated to Silver.");
+        // }
+
+        let updated = false;
+
+        if (data.data.no_of_direct_referrals >= 2 && totalInvestmentAmount >= 500000) {
+            await users.updateOne({ _id: user_id }, { $set: { user_rank: "Silver" } });
+            updated = true;
+            console.log("User rank updated to Silver.");
+        }
+
+        // Fetch updated user data if update was performed
+        if (updated) {
+            data = await userService.findAndGetUserAccount(user_id);
+        }
+
+        return res.status(200).json({ Status: true, message: 'Get user account successful!', data });
     } catch (error) {
         res.status(500).json({ message: 'Server Error' });
     }
@@ -687,6 +749,5 @@ exports.getInactiveUsers = async (req, res) => {
         res.status(500).json({ message: 'Server Error', error: error.message });
     }
 };
-
 //Get Inactive user details END
 
