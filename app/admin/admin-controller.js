@@ -418,31 +418,90 @@ exports.kycApprovedRejected = async (req, res) => {
 //Approved refferal payout START
 exports.referralPayoutsApprovedRejected = async (req, res) => {
     try {
-        const { userId, payoutId, status } = req.body; 
+        const { userId, payoutId, investment_id, status } = req.body;
 
         if (!["Approved", "Rejected"].includes(status)) {
             return res.status(400).json({ message: "Invalid status. Use 'Approved' or 'Rejected'." });
         }
-        
-        const user = await users.findById(userId);
+
+        const user = await users.findById(userId).populate('referrals');
         if (!user) {
             return res.status(404).json({ Status: 'Error', message: 'User not found' });
         }
 
-        const payout = user.referral_payouts.id(payoutId);
-        const investment = user.investment_info.id(payoutId);
-        console.log("payout",payout)
-        console.log("investment",investment)
+        const payout = user.referral_payouts.find(
+            (p) => String(p._id) === payoutId && String(p.investment_id) === investment_id
+        );
+
         if (!payout) {
-            return res.status(404).json({ Status: 'Error', message: 'referral payouts not found' });
+            return res.status(404).json({ Status: 'Error', message: 'Referral payout not found' });
         }
 
+        // Update status
         payout.status = status;
-        await user.save(); 
 
-        return res.status(200).json({ 
-            Status: 'Success', 
-            message: `Referral payout status updated to ${status}.` 
+        // Proceed only if approved
+        if (status === "Approved") {
+            const currentPayoutDate = moment(payout.payout_date);
+
+            // Get investment info
+            const referredUsers = user.referrals || [];
+            let investmentData;
+            for (const referredUser of referredUsers) {
+                const investment = referredUser.investment_info?.find(
+                    inv => String(inv._id) === investment_id && inv.investment_status === "Approved"
+                );
+                if (investment) {
+                    investmentData = investment;
+                    break;
+                }
+            }
+
+            if (!investmentData) {
+                return res.status(404).json({ message: "Investment not found or not approved" });
+            }
+
+            const investDuration = investmentData.invest_duration_in_month || 0;
+            const investStartDate = moment(investmentData.invest_confirm_date);
+
+            // Calculate first payout date logic (same as before)
+            const day = investStartDate.date();
+            let initialPayoutDate;
+            if (day <= 10) initialPayoutDate = investStartDate.clone().add(1, 'months').date(11);
+            else if (day <= 20) initialPayoutDate = investStartDate.clone().add(1, 'months').date(21);
+            else initialPayoutDate = investStartDate.clone().add(2, 'months').date(2);
+
+            // Generate remaining payouts
+            const newPayouts = [];
+            for (let i = 1; i < investDuration; i++) {
+                const nextDate = initialPayoutDate.clone().add(i, 'months');
+                const formattedNextDate = nextDate.format("YYYY-MM-DD");
+
+                const exists = user.referral_payouts.some(p =>
+                    String(p.investment_id) === investment_id &&
+                    moment(p.payout_date).isSame(formattedNextDate, 'day')
+                );
+
+                if (!exists && nextDate.isAfter(currentPayoutDate)) {
+                    newPayouts.push({
+                        payout_date: nextDate.toDate(),
+                        amount: 0,
+                        status: "Pending",
+                        investment_id
+                    });
+                }
+            }
+
+            if (newPayouts.length > 0) {
+                user.referral_payouts.push(...newPayouts);
+            }
+        }
+
+        await user.save();
+
+        return res.status(200).json({
+            Status: 'Success',
+            message: `Referral payout status updated to ${status}, and future payouts generated.`,
         });
 
     } catch (error) {
@@ -450,4 +509,6 @@ exports.referralPayoutsApprovedRejected = async (req, res) => {
         return res.status(500).json({ message: "Internal Server Error" });
     }
 };
+
+
 //Approved refferal payout END

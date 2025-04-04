@@ -147,7 +147,7 @@ const userSchema = new Schema({
     }],
     user_level:{
         type: String,
-        default: "level 0"
+        default: "level 1"
     },
     investment_info: [{
         invest_no: { type: Number, default: 0},
@@ -249,6 +249,7 @@ const userSchema = new Schema({
         type:String,
         default:" ",  
     },
+    
     tokens: [{
         type: mongoose.Schema.Types.ObjectId,
         default: " ",

@@ -28,4 +28,7 @@ route.post('/kycApprovedRejected/:UserId',adminController.kycApprovedRejected);
 //referral Payouts Approved or Rejected
 route.post('/referralPayoutsApprovedRejected',adminController.referralPayoutsApprovedRejected);
 
+
+
+
 module.exports = route; 
