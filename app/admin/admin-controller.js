@@ -7,6 +7,7 @@ const moment = require('moment');
 const adminService = require('../services/admin-service');
 const admins =require('../admin/admin-model')
 const bcrypt = require('bcrypt');
+require('dotenv').config();
 
 const generateUserId = () => {
     return `USER${Date.now()}${Math.floor(Math.random() * 1000)}`;
@@ -176,10 +177,14 @@ exports.loginAdmin = async (req, res) => {
         if (!admin || admin.password !== password) {
             return res.status(401).json({ status: false, message: 'The email/password is invalid.' });
         }
+        const token = process.env.ADMIN_TOKEN;
+
+        
 
         return res.status(200).json({
             status: true,
-            message: 'Login successful!'
+            message: 'Login successful!',
+            token: token
         });
     } catch (err) {
         console.log('err', err.message);
