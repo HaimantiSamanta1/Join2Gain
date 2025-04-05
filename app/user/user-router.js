@@ -19,8 +19,10 @@ route.get('/getUsers',userController.getUsers);
 route.get('/getInactiveUsers',VerifyJwtToken,userController.getInactiveUsers);
 //Get a particuler user
 route.get('/getUser/:user_id',userController.getUser11);
-
+//calculate refferal amount
 route.post('/getReferralPayoutAmountOfInvestment',userController.getReferralPayoutAmountOfInvestment);
+
+route.get('/getUserData/:user_id',userController.getUserData);
 
 //Edit user password
 route.patch('/editUserPassword/:user_id',VerifyJwtToken,userController.editUserPassword);
@@ -48,6 +50,8 @@ route.get('/getTopUp/:user_id',userController.getTopUp);
 
 //Get top up for all user
 route.get('/getAllUsersTopUp',userController.getAllUsersTopUp);
+
+
 
 
 

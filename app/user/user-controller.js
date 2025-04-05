@@ -422,18 +422,6 @@ exports.getUser = async (req, res) => {
     }
 };
 
-
-// function getPreviousRankPercentage(rank) {
-//     switch (rank) {
-//         case "Diamond": return 0.25;
-//         case "Platinum": return 0.5;
-//         case "Gold": return 1;
-//         case "Silver": return 2;
-//         default: return 3;
-//     }
-// }
-
-
 exports.getUser11 = async (req, res) => {
     try {
         let { user_id } = req.params;
@@ -625,6 +613,7 @@ exports.getUser11 = async (req, res) => {
         return res.status(200).json({
             Status: true,
             message: 'Get user account successful!',
+            Direct_refferal_totalInvestmentAmount:totalInvestmentAmount,
             data,
         });
 
@@ -1371,3 +1360,66 @@ exports.getAllUsersTopUp = async (req, res) => {
 
 //
 
+
+
+exports.getUserData = async (req, res) => {
+    try {
+        let { user_id } = req.params;
+        let data = await userService.findAndGetUserAccount(user_id);
+
+        if (!data || !data.data) {
+            return res.status(404).json({ Status: false, message: 'User Account Not Found' });
+        }
+
+        const user = data.data;
+        const no_of_direct_referrals=data.data.no_of_direct_referrals;
+
+        let userTotalInvestment = 0;
+        let referralTotalInvestment = 0;
+
+   
+        if (Array.isArray(user.investment_info)) {
+            user.investment_info.forEach(investment => {
+                if (
+                    investment.investment_status?.toLowerCase() === 'approved' &&
+                    investment.invest_amount
+                ) {
+                    userTotalInvestment += investment.invest_amount;
+                }
+            });
+        }
+
+
+        const referrals = await users.find({ sponsor_id: user.user_profile_id });
+
+    
+        referrals.forEach(ref => {
+            if (Array.isArray(ref.investment_info)) {
+                ref.investment_info.forEach(investment => {
+                    if (
+                        investment.investment_status?.toLowerCase() === 'approved' &&
+                        investment.invest_amount
+                    ) {
+                        referralTotalInvestment += investment.invest_amount;
+                    }
+                });
+            }
+        });
+
+        
+        return res.status(200).json({
+            Status: true,
+            message: 'Get user info successful!',
+            data: {
+               // user_info: user,
+                no_of_direct_referrals:no_of_direct_referrals,
+                user_total_investment: userTotalInvestment,
+                direct_referral_total_investment: referralTotalInvestment
+            }
+        });
+
+    } catch (error) {
+        console.error("Error in getUserData:", error);
+        return res.status(500).json({ Status: false, message: 'Server Error', error: error.message });
+    }
+};
