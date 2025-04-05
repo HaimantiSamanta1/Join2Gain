@@ -506,7 +506,7 @@ exports.getUser11 = async (req, res) => {
                             if (!isDuplicate) {
                                 referralPayouts.push({
                                     payout_date: payoutDate,
-                                    amount: investment.invest_amount * (referralIncomePercentage / 100),
+                                    //amount: investment.invest_amount * (referralIncomePercentage / 100),
                                     status: "Pending",
                                     investment_id: investment._id
                                 });
@@ -518,6 +518,8 @@ exports.getUser11 = async (req, res) => {
         }
 
         let no_of_direct_referrals = data.data.no_of_direct_referrals || 0;
+
+        console.log("total InvestmentAmount of referral",totalInvestmentAmount)
 
         if (no_of_direct_referrals >= 14 && totalInvestmentAmount >= 3000000) {
             rankOfUser = "Diamond";
@@ -596,7 +598,7 @@ exports.getUser11 = async (req, res) => {
                         } else {
                             referralPayouts.push({
                                 payout_date: adjustedPayoutDate,
-                                amount: investment.invest_amount * (applicablePercentage / 100),
+                               // amount: investment.invest_amount * (applicablePercentage / 100),
                                 status: "Pending",
                                 investment_id: investment._id
                             });
