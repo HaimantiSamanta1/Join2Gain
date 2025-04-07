@@ -249,6 +249,19 @@ const userSchema = new Schema({
         type:String,
         default:" ",  
     },
+    rewards_achieved: [{
+        reward_name: { type: String, default: "" },
+        reward_achieved_date: {
+            type: Date,
+            default: null,
+            validate: {
+                validator: function (date) {
+                    return !date || moment(date).isValid();
+                },
+                message: 'Invalid date format for reward date!',
+            },
+        }
+    }],
     
     tokens: [{
         type: mongoose.Schema.Types.ObjectId,

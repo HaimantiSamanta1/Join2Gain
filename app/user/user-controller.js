@@ -1361,59 +1361,148 @@ exports.getAllUsersTopUp = async (req, res) => {
 //
 
 
+// exports.getUserData = async (req, res) => {
+//     try {
+//         let { user_id } = req.params;
+//         let data = await userService.findAndGetUserAccount(user_id);
+
+//         if (!data || !data.data) {
+//             return res.status(404).json({ Status: false, message: 'User Account Not Found' });
+//         }
+
+//         const user = data.data;
+//         const no_of_direct_referrals=data.data.no_of_direct_referrals;
+
+//         let userTotalInvestment = 0;
+//         let referralTotalInvestment = 0;
+
+   
+//         if (Array.isArray(user.investment_info)) {
+//             user.investment_info.forEach(investment => {
+//                 if (
+//                     investment.investment_status?.toLowerCase() === 'approved' &&
+//                     investment.invest_amount
+//                 ) {
+//                     userTotalInvestment += investment.invest_amount;
+//                 }
+//             });
+//         }
+
+
+//         const referrals = await users.find({ sponsor_id: user.user_profile_id });
+
+    
+//         referrals.forEach(ref => {
+//             if (Array.isArray(ref.investment_info)) {
+//                 ref.investment_info.forEach(investment => {
+//                     if (
+//                         investment.investment_status?.toLowerCase() === 'approved' &&
+//                         investment.invest_amount
+//                     ) {
+//                         referralTotalInvestment += investment.invest_amount;
+//                     }
+//                 });
+//             }
+//         });
+
+        
+//         return res.status(200).json({
+//             Status: true,
+//             message: 'Get user info successful!',
+//             data: {
+//                // user_info: user,
+//                 no_of_direct_referrals:no_of_direct_referrals,
+//                 user_total_investment: userTotalInvestment,
+//                 direct_referral_total_investment: referralTotalInvestment
+//             }
+//         });
+
+//     } catch (error) {
+//         console.error("Error in getUserData:", error);
+//         return res.status(500).json({ Status: false, message: 'Server Error', error: error.message });
+//     }
+// };
+
 exports.getUserData = async (req, res) => {
     try {
-        let { user_id } = req.params;
-        let data = await userService.findAndGetUserAccount(user_id);
+        const { user_id } = req.params;
+        const data = await userService.findAndGetUserAccount(user_id);
 
         if (!data || !data.data) {
             return res.status(404).json({ Status: false, message: 'User Account Not Found' });
         }
 
         const user = data.data;
-        const no_of_direct_referrals=data.data.no_of_direct_referrals;
+        const no_of_direct_referrals = user.no_of_direct_referrals;
 
         let userTotalInvestment = 0;
         let referralTotalInvestment = 0;
+        let rankCounts = { Silver: 0, Gold: 0, Platinum: 0, Diamond: 0 };
 
-   
+        // User's own investment
         if (Array.isArray(user.investment_info)) {
             user.investment_info.forEach(investment => {
-                if (
-                    investment.investment_status?.toLowerCase() === 'approved' &&
-                    investment.invest_amount
-                ) {
+                if (investment.investment_status?.toLowerCase() === 'approved' && investment.invest_amount) {
                     userTotalInvestment += investment.invest_amount;
                 }
             });
         }
 
-
+        // Referrals
         const referrals = await users.find({ sponsor_id: user.user_profile_id });
 
-    
         referrals.forEach(ref => {
             if (Array.isArray(ref.investment_info)) {
                 ref.investment_info.forEach(investment => {
-                    if (
-                        investment.investment_status?.toLowerCase() === 'approved' &&
-                        investment.invest_amount
-                    ) {
+                    if (investment.investment_status?.toLowerCase() === 'approved' && investment.invest_amount) {
                         referralTotalInvestment += investment.invest_amount;
                     }
                 });
             }
+
+            const latestRank = ref.user_rank_info?.[ref.user_rank_info.length - 1]?.rank_of_user;
+            if (latestRank && rankCounts[latestRank]) {
+                rankCounts[latestRank]++;
+            }
         });
 
-        
+        // Determine earned rewards
+        const currentRewards = user.rewards_achieved?.map(r => r.reward_name) || [];
+        const rewards_achieved = user.rewards_achieved || [];
+
+        const now = new Date();
+
+        rewardCriteria.forEach(rule => {
+            const achieved =
+                (rule.directReferrals === undefined || no_of_direct_referrals >= rule.directReferrals) &&
+                (rule.referralInvestment === undefined || referralTotalInvestment >= rule.referralInvestment) &&
+                (rule.userInvestment === undefined || userTotalInvestment >= rule.userInvestment) &&
+                (rule.silver === undefined || rankCounts.Silver >= rule.silver) &&
+                (rule.gold === undefined || rankCounts.Gold >= rule.gold) &&
+                (rule.platinum === undefined || rankCounts.Platinum >= rule.platinum) &&
+                (rule.diamond === undefined || rankCounts.Diamond >= rule.diamond);
+
+            if (achieved && !currentRewards.includes(rule.name)) {
+                rewards_achieved.push({ reward_name: rule.name, reward_achieved_date: now });
+            }
+        });
+
+        // Update if new rewards added
+        if (rewards_achieved.length > (user.rewards_achieved?.length || 0)) {
+            await users.updateOne(
+                { _id: user._id },
+                { $set: { rewards_achieved } }
+            );
+        }
+
         return res.status(200).json({
             Status: true,
             message: 'Get user info successful!',
             data: {
-               // user_info: user,
-                no_of_direct_referrals:no_of_direct_referrals,
+                no_of_direct_referrals,
                 user_total_investment: userTotalInvestment,
-                direct_referral_total_investment: referralTotalInvestment
+                direct_referral_total_investment: referralTotalInvestment,
+                rewards_achieved
             }
         });
 
@@ -1422,6 +1511,7 @@ exports.getUserData = async (req, res) => {
         return res.status(500).json({ Status: false, message: 'Server Error', error: error.message });
     }
 };
+
 
 
 //Top-up file download START 
