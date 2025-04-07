@@ -1,15 +1,13 @@
 const express = require('express');
 const dotenv = require('dotenv');
 const bodyParser = require('body-parser');
-// var http = require('http');
-// var mongoPassword = 'password';
-
-const dbconnection = require('./config/db'); 
+const connectDB = require('./config/database-en');
 
 //Config
 dotenv.config();
 
 const cors = require('cors');
+
 const corsOptions = {    
     origin: ['http://localhost:3000','http://192.168.195.250:3000', '*'],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
@@ -23,7 +21,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({limit: '70mb', extended: true, parameterLimit: 1000000}));
 
 //Connect Database
-dbconnection()
+connectDB()
 
 const router = require('./router');
 app.use( '/api', router );
@@ -34,9 +32,13 @@ app.use( '/api', router );
 
 const PORT = process.env.PORT || 4006
 const server = app.listen(PORT, () => {
-    console.log(`Server Running on http://localhost:${PORT}`)
-    //console.log(`Server Running on https://apps.cihsr.ac.in/pmbackend:${PORT}`)
+    console.log(`Server Running on http://localhost:${PORT}`)  
 });
+
+// app.listen(PORT, () => {
+//     console.log(`Server Running on http://localhost:${PORT}`);
+// });
+
 
 process.on("unhandledRejection", (err) => {
     console.log(`Error: ${err.message}`);

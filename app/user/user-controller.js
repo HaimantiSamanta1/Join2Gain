@@ -1361,7 +1361,6 @@ exports.getAllUsersTopUp = async (req, res) => {
 //
 
 
-
 exports.getUserData = async (req, res) => {
     try {
         let { user_id } = req.params;
@@ -1423,3 +1422,56 @@ exports.getUserData = async (req, res) => {
         return res.status(500).json({ Status: false, message: 'Server Error', error: error.message });
     }
 };
+
+
+//Top-up file download START 
+exports.downloadTopupFile = async (req, res) => {
+    try {
+       // let { token } = req.userData;
+        const dir = path.join(__dirname, '..', '..', 'JoinToGain', 'TopupProofFiles');
+
+        // Ensure the directory exists
+        await fs.promises.mkdir(dir, { recursive: true });
+
+        console.log('Directory:', dir);
+
+        const filename = req.params.filename;
+
+        // Read the files in the directory using fs.promises.readdir
+        const filesInFolder = await fs.promises.readdir(dir);
+        console.log('Files in directory:', filesInFolder);
+
+        const filePath = path.join(dir, filename);
+
+        // Log the full file path
+        console.log('Full File Path:', filePath);
+
+        // Check if the file exists
+        if (fs.existsSync(filePath)) {
+            // Determine the file extension
+            const fileExtension = path.extname(filePath).toLowerCase();
+
+            // Set content type based on file extension
+            let contentType = 'application/octet-stream'; // Default content type
+            if (fileExtension === '.pdf') {
+                contentType = 'application/pdf';
+            } else if (fileExtension === '.jpg' || fileExtension === '.jpeg') {
+                contentType = 'image/jpeg';
+            } else if (fileExtension === '.xls' || fileExtension === '.xlsx') {
+                contentType = 'application/vnd.ms-excel';
+            } // Add more conditions for other file types if needed
+
+            // Stream the file to the client
+            const fileStream = fs.createReadStream(filePath);
+            res.setHeader('Content-Type', contentType);
+            res.setHeader('Content-Disposition', `attachment; filename=${filename}`);
+            fileStream.pipe(res);
+        } else {
+            res.status(404).json({ error: 'File not found' });
+        }
+    } catch (error) {
+        console.error('Error downloading major project file:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};
+//Top-up file download END

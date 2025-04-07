@@ -50,6 +50,9 @@ route.get('/getTopUp/:user_id',userController.getTopUp);
 
 //Get top up for all user
 route.get('/getAllUsersTopUp',userController.getAllUsersTopUp);
+//Top up file download
+route.get('/downloadTopupFile/:filename',userController.downloadTopupFile);
+
 
 
 
