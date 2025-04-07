@@ -1423,8 +1423,41 @@ exports.getAllUsersTopUp = async (req, res) => {
 //     }
 // };
 
+// Inside your getUserData controller
+
+
+// // Sort criteria descending by amount so we assign highest possible reward
+// rewardCriteria.sort((a, b) => b.amount - a.amount).forEach(criteria => {
+//     if (userTotalInvestment >= criteria.amount) {
+//         achievedRewards.push({
+//             reward: criteria.reward,
+//             date: new Date()
+//         });
+//     }
+// });
+
+
+// Define your reward criteria based on total investment or referral count
+// const rewardCriteria = [
+//     { name: 'Silver', amount: 50000, directReferrals: 2 },
+//     { name: 'Gold', amount: 100000, directReferrals: 5 },
+//     { name: 'Platinum', amount: 250000, directReferrals: 10 },
+//     { name: 'Diamond', amount: 300000, directReferrals: 14 },
+// ];
+
+
+
+
 exports.getUserData = async (req, res) => {
     try {
+        const rewardCriteria = [
+            { name: 'Silver', amount: 50000, directReferrals: 2 },
+            { name: 'Gold', amount: 100000, directReferrals: 5 },
+            { name: 'Platinum', amount: 250000, directReferrals: 10 },
+            { name: 'Diamond', amount: 300000, directReferrals: 14 },
+        ];
+
+        //
         const { user_id } = req.params;
         const data = await userService.findAndGetUserAccount(user_id);
 
@@ -1437,9 +1470,8 @@ exports.getUserData = async (req, res) => {
 
         let userTotalInvestment = 0;
         let referralTotalInvestment = 0;
-        let rankCounts = { Silver: 0, Gold: 0, Platinum: 0, Diamond: 0 };
 
-        // User's own investment
+        // Calculate user's own approved investments
         if (Array.isArray(user.investment_info)) {
             user.investment_info.forEach(investment => {
                 if (investment.investment_status?.toLowerCase() === 'approved' && investment.invest_amount) {
@@ -1448,7 +1480,7 @@ exports.getUserData = async (req, res) => {
             });
         }
 
-        // Referrals
+        // Get referrals and their approved investments
         const referrals = await users.find({ sponsor_id: user.user_profile_id });
 
         referrals.forEach(ref => {
@@ -1459,35 +1491,27 @@ exports.getUserData = async (req, res) => {
                     }
                 });
             }
-
-            const latestRank = ref.user_rank_info?.[ref.user_rank_info.length - 1]?.rank_of_user;
-            if (latestRank && rankCounts[latestRank]) {
-                rankCounts[latestRank]++;
-            }
         });
 
-        // Determine earned rewards
+        // Track already achieved rewards
         const currentRewards = user.rewards_achieved?.map(r => r.reward_name) || [];
         const rewards_achieved = user.rewards_achieved || [];
 
         const now = new Date();
 
+        // Determine new rewards based on criteria
         rewardCriteria.forEach(rule => {
-            const achieved =
-                (rule.directReferrals === undefined || no_of_direct_referrals >= rule.directReferrals) &&
-                (rule.referralInvestment === undefined || referralTotalInvestment >= rule.referralInvestment) &&
-                (rule.userInvestment === undefined || userTotalInvestment >= rule.userInvestment) &&
-                (rule.silver === undefined || rankCounts.Silver >= rule.silver) &&
-                (rule.gold === undefined || rankCounts.Gold >= rule.gold) &&
-                (rule.platinum === undefined || rankCounts.Platinum >= rule.platinum) &&
-                (rule.diamond === undefined || rankCounts.Diamond >= rule.diamond);
+            const achieved = userTotalInvestment >= rule.amount && no_of_direct_referrals >= rule.directReferrals;
 
             if (achieved && !currentRewards.includes(rule.name)) {
-                rewards_achieved.push({ reward_name: rule.name, reward_achieved_date: now });
+                rewards_achieved.push({
+                    reward_name: rule.name,
+                    reward_achieved_date: now
+                });
             }
         });
 
-        // Update if new rewards added
+        // Save if new rewards were added
         if (rewards_achieved.length > (user.rewards_achieved?.length || 0)) {
             await users.updateOne(
                 { _id: user._id },
@@ -1505,12 +1529,13 @@ exports.getUserData = async (req, res) => {
                 rewards_achieved
             }
         });
-
     } catch (error) {
         console.error("Error in getUserData:", error);
         return res.status(500).json({ Status: false, message: 'Server Error', error: error.message });
     }
 };
+
+
 
 
 
