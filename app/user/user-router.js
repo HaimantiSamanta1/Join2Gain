@@ -18,9 +18,9 @@ route.get('/getUsers',userController.getUsers);
 //Get Inactive members
 route.get('/getInactiveUsers',VerifyJwtToken,userController.getInactiveUsers);
 //Get a particuler user
-route.get('/getUser/:user_id',userController.getUser11);
+route.get('/getUser/:user_id',userController.getUser12);
 //calculate refferal amount
-route.post('/getReferralPayoutAmountOfInvestment',userController.getReferralPayoutAmountOfInvestment);
+route.post('/getReferralPayoutAmountOfInvestment',userController.getReferralPayoutAmountOfInvestment2);
 
 route.get('/getUserData/:user_id',userController.getUserData11);
 

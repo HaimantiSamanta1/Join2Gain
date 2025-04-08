@@ -9,7 +9,7 @@ dotenv.config();
 const cors = require('cors');
 
 const corsOptions = {    
-    origin: ['http://localhost:3000','http://192.168.195.250:3000', '*'],
+    origin: ['http://localhost:3000','http://admin-beige-mu.vercel.app','http://join2gain.vercel.app', '*'],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
     optionsSuccessStatus: 204,
