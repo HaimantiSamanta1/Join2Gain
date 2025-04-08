@@ -1361,67 +1361,195 @@ exports.getAllUsersTopUp = async (req, res) => {
 //
 
 
-// exports.getUserData = async (req, res) => {
-//     try {
-//         let { user_id } = req.params;
-//         let data = await userService.findAndGetUserAccount(user_id);
+exports.getUserData = async (req, res) => {
+    try {
+        let { user_id } = req.params;
+        let data = await userService.findAndGetUserAccount(user_id);
 
-//         if (!data || !data.data) {
-//             return res.status(404).json({ Status: false, message: 'User Account Not Found' });
-//         }
+        if (!data || !data.data) {
+            return res.status(404).json({ Status: false, message: 'User Account Not Found' });
+        }
 
-//         const user = data.data;
-//         const no_of_direct_referrals=data.data.no_of_direct_referrals;
+        const user = data.data;
+        const no_of_direct_referrals=data.data.no_of_direct_referrals;
 
-//         let userTotalInvestment = 0;
-//         let referralTotalInvestment = 0;
+        let userTotalInvestment = 0;
+        let referralTotalInvestment = 0;
 
    
-//         if (Array.isArray(user.investment_info)) {
-//             user.investment_info.forEach(investment => {
-//                 if (
-//                     investment.investment_status?.toLowerCase() === 'approved' &&
-//                     investment.invest_amount
-//                 ) {
-//                     userTotalInvestment += investment.invest_amount;
-//                 }
-//             });
-//         }
+        if (Array.isArray(user.investment_info)) {
+            user.investment_info.forEach(investment => {
+                if (
+                    investment.investment_status?.toLowerCase() === 'approved' &&
+                    investment.invest_amount
+                ) {
+                    userTotalInvestment += investment.invest_amount;
+                }
+            });
+        }
 
 
-//         const referrals = await users.find({ sponsor_id: user.user_profile_id });
+        const referrals = await users.find({ sponsor_id: user.user_profile_id });
 
     
-//         referrals.forEach(ref => {
-//             if (Array.isArray(ref.investment_info)) {
-//                 ref.investment_info.forEach(investment => {
-//                     if (
-//                         investment.investment_status?.toLowerCase() === 'approved' &&
-//                         investment.invest_amount
-//                     ) {
-//                         referralTotalInvestment += investment.invest_amount;
-//                     }
-//                 });
-//             }
-//         });
+        referrals.forEach(ref => {
+            if (Array.isArray(ref.investment_info)) {
+                ref.investment_info.forEach(investment => {
+                    if (
+                        investment.investment_status?.toLowerCase() === 'approved' &&
+                        investment.invest_amount
+                    ) {
+                        referralTotalInvestment += investment.invest_amount;
+                    }
+                });
+            }
+        });
 
         
-//         return res.status(200).json({
-//             Status: true,
-//             message: 'Get user info successful!',
-//             data: {
-//                // user_info: user,
-//                 no_of_direct_referrals:no_of_direct_referrals,
-//                 user_total_investment: userTotalInvestment,
-//                 direct_referral_total_investment: referralTotalInvestment
-//             }
-//         });
+        return res.status(200).json({
+            Status: true,
+            message: 'Get user info successful!',
+            data: {
+               // user_info: user,
+                no_of_direct_referrals:no_of_direct_referrals,
+                user_total_investment: userTotalInvestment,
+                direct_referral_total_investment: referralTotalInvestment
+            }
+        });
 
-//     } catch (error) {
-//         console.error("Error in getUserData:", error);
-//         return res.status(500).json({ Status: false, message: 'Server Error', error: error.message });
-//     }
-// };
+    } catch (error) {
+        console.error("Error in getUserData:", error);
+        return res.status(500).json({ Status: false, message: 'Server Error', error: error.message });
+    }
+};
+
+exports.getUserData11 = async (req, res) => {
+    try {
+        const { user_id } = req.params;
+        const data = await userService.findAndGetUserAccount(user_id);
+
+        if (!data || !data.data) {
+            return res.status(404).json({ Status: false, message: 'User Account Not Found' });
+        }
+
+        const user = data.data;
+      //  const rewards = data.data.rewards;
+        const no_of_direct_referrals = user.no_of_direct_referrals || 0;
+
+        let userTotalInvestment = 0;
+        let referralTotalInvestment = 0;
+
+        // User's own approved investment total
+        if (Array.isArray(user.investment_info)) {
+            user.investment_info.forEach(investment => {
+                if (
+                    investment.investment_status?.toLowerCase() === 'approved' &&
+                    typeof investment.invest_amount === 'number'
+                ) {
+                    userTotalInvestment += investment.invest_amount;
+                }
+            });
+        }
+
+        // Referrals' total approved investment
+        const referrals = await users.find({ sponsor_id: user.user_profile_id });
+
+        referrals.forEach(ref => {
+            if (Array.isArray(ref.investment_info)) {
+                ref.investment_info.forEach(investment => {
+                    if (
+                        investment.investment_status?.toLowerCase() === 'approved' &&
+                        typeof investment.invest_amount === 'number'
+                    ) {
+                        referralTotalInvestment += investment.invest_amount;
+                    }
+                });
+            }
+        });
+
+        // Check for "Tablet" reward eligibility
+        let rewards = user.rewards || [];
+        
+        const rewardList = [
+            {
+                name: "Tablet",
+                condition: () =>
+                    no_of_direct_referrals >= 4 &&
+                    userTotalInvestment >= 2500000 &&
+                    referralTotalInvestment >= 1000000
+            },
+            {
+                name: "THAILAND OR MALAYSIA TRIP (2 PERSONS)",
+                condition: () =>
+                    no_of_direct_referrals >= 10 &&
+                    userTotalInvestment >= 5000000 &&
+                    referralTotalInvestment >= 2500000
+            },
+            {
+                name: "2 LAKHS WORTH GOLD",
+                condition: () =>
+                    no_of_direct_referrals >= 17 &&
+                    userTotalInvestment >= 10000000 &&
+                    referralTotalInvestment >= 8000000
+            },
+            {
+                name: "DUBAI TRIP - 2 PERSONS + 2 LAKHS WORTH GOLD",
+                condition: () =>
+                    no_of_direct_referrals >= 70 &&
+                    userTotalInvestment >= 20000000 &&
+                    referralTotalInvestment >= 14000000
+            },
+            {
+                name: "CAR FUND - Rs. 10 LAKHS",
+                condition: () =>
+                    no_of_direct_referrals >= 95 &&
+                    userTotalInvestment >= 30000000 &&
+                    referralTotalInvestment >= 19000000
+            },
+            {
+                name: "HOUSE FUND - Rs. 25 LAKHS",
+                condition: () =>
+                    no_of_direct_referrals >= 168 &&
+                    userTotalInvestment >= 50000000 &&
+                    referralTotalInvestment >= 35000000
+            }
+        ];
+
+        let updated = false;
+
+        for (const reward of rewardList) {
+            const alreadyExists = rewards.some(r => r.reward_name === reward.name);
+            if (reward.condition() && !alreadyExists) {
+                rewards.push({
+                    reward_name: reward.name,
+                    reward_achieved_date: new Date()
+                });
+                updated = true;
+            }
+        }
+
+        if (updated) {
+            await users.updateOne({ _id: user._id }, { $set: { rewards } });
+        }
+
+        return res.status(200).json({
+            Status: true,
+            message: 'Get user info successful!',
+            data: {
+                no_of_direct_referrals,
+                user_total_investment: userTotalInvestment,
+                direct_referral_total_investment: referralTotalInvestment,
+                rewards:rewards,
+                data
+            }
+        });
+
+    } catch (error) {
+        console.error("Error in getUserData:", error);
+        return res.status(500).json({ Status: false, message: 'Server Error', error: error.message });
+    }
+};
+
 
 // Inside your getUserData controller
 
@@ -1446,19 +1574,97 @@ exports.getAllUsersTopUp = async (req, res) => {
 // ];
 
 
+// exports.getUserData = async (req, res) => {
+//     try {
+//         const rewardCriteria = [
+//             { name: 'Silver', amount: 50000, directReferrals: 2 },
+//             { name: 'Gold', amount: 100000, directReferrals: 5 },
+//             { name: 'Platinum', amount: 250000, directReferrals: 10 },
+//             { name: 'Diamond', amount: 300000, directReferrals: 14 },
+//         ];
 
+//         //
+//         const { user_id } = req.params;
+//         const data = await userService.findAndGetUserAccount(user_id);
 
-exports.getUserData = async (req, res) => {
+//         if (!data || !data.data) {
+//             return res.status(404).json({ Status: false, message: 'User Account Not Found' });
+//         }
+
+//         const user = data.data;
+//         const no_of_direct_referrals = user.no_of_direct_referrals;
+
+//         let userTotalInvestment = 0;
+//         let referralTotalInvestment = 0;
+
+//         // Calculate user's own approved investments
+//         if (Array.isArray(user.investment_info)) {
+//             user.investment_info.forEach(investment => {
+//                 if (investment.investment_status?.toLowerCase() === 'approved' && investment.invest_amount) {
+//                     userTotalInvestment += investment.invest_amount;
+//                 }
+//             });
+//         }
+
+//         // Get referrals and their approved investments
+//         const referrals = await users.find({ sponsor_id: user.user_profile_id });
+
+//         referrals.forEach(ref => {
+//             if (Array.isArray(ref.investment_info)) {
+//                 ref.investment_info.forEach(investment => {
+//                     if (investment.investment_status?.toLowerCase() === 'approved' && investment.invest_amount) {
+//                         referralTotalInvestment += investment.invest_amount;
+//                     }
+//                 });
+//             }
+//         });
+
+//         // Track already achieved rewards
+//         const currentRewards = user.rewards_achieved?.map(r => r.reward_name) || [];
+//         const rewards_achieved = user.rewards_achieved || [];
+
+//         const now = new Date();
+
+//         // Determine new rewards based on criteria
+//         rewardCriteria.forEach(rule => {
+//             const achieved = userTotalInvestment >= rule.amount && no_of_direct_referrals >= rule.directReferrals;
+
+//             if (achieved && !currentRewards.includes(rule.name)) {
+//                 rewards_achieved.push({
+//                     reward_name: rule.name,
+//                     reward_achieved_date: now
+//                 });
+//             }
+//         });
+
+//         // Save if new rewards were added
+//         if (rewards_achieved.length > (user.rewards_achieved?.length || 0)) {
+//             await users.updateOne(
+//                 { _id: user._id },
+//                 { $set: { rewards_achieved } }
+//             );
+//         }
+
+//         return res.status(200).json({
+//             Status: true,
+//             message: 'Get user info successful!',
+//             data: {
+//                 no_of_direct_referrals,
+//                 user_total_investment: userTotalInvestment,
+//                 direct_referral_total_investment: referralTotalInvestment,
+//                 rewards_achieved
+//             }
+//         });
+//     } catch (error) {
+//         console.error("Error in getUserData:", error);
+//         return res.status(500).json({ Status: false, message: 'Server Error', error: error.message });
+//     }
+// };
+
+exports.getUserData1 = async (req, res) => {
     try {
-        const rewardCriteria = [
-            { name: 'Silver', amount: 50000, directReferrals: 2 },
-            { name: 'Gold', amount: 100000, directReferrals: 5 },
-            { name: 'Platinum', amount: 250000, directReferrals: 10 },
-            { name: 'Diamond', amount: 300000, directReferrals: 14 },
-        ];
-
-        //
         const { user_id } = req.params;
+
         const data = await userService.findAndGetUserAccount(user_id);
 
         if (!data || !data.data) {
@@ -1493,6 +1699,14 @@ exports.getUserData = async (req, res) => {
             }
         });
 
+        // Reward Criteria
+        const rewardCriteria = [
+            { name: 'Silver', amount: 50000, directReferrals: 2 },
+            { name: 'Gold', amount: 100000, directReferrals: 5 },
+            { name: 'Platinum', amount: 250000, directReferrals: 10 },
+            { name: 'Diamond', amount: 300000, directReferrals: 14 },
+        ];
+
         // Track already achieved rewards
         const currentRewards = user.rewards_achieved?.map(r => r.reward_name) || [];
         const rewards_achieved = user.rewards_achieved || [];
@@ -1519,6 +1733,52 @@ exports.getUserData = async (req, res) => {
             );
         }
 
+        // Step 1: Count how many of each reward the user has achieved
+        const rewardCounts = rewards_achieved.reduce((acc, reward) => {
+            acc[reward.reward_name] = (acc[reward.reward_name] || 0) + 1;
+            return acc;
+        }, {});
+
+        // Step 2: Define milestone reward tiers
+        const milestoneRewards = [
+            {
+                condition: (counts, investment) =>
+                    counts['Silver'] >= 2 && investment >= 2500000,
+                reward: 'Tablet'
+            },
+            {
+                condition: (counts, investment) =>
+                    counts['Silver'] >= 5 && investment >= 5000000,
+                reward: 'Thailand/Malaysia Trip (2 people)'
+            },
+            {
+                condition: (counts, investment) =>
+                    counts['Silver'] >= 6 && counts['Gold'] >= 3 && investment >= 10000000,
+                reward: '₹2 Lakhs Worth of Gold'
+            },
+            {
+                condition: (counts, investment) =>
+                    counts['Gold'] >= 6 && counts['Platinum'] >= 4 && investment >= 20000000,
+                reward: 'Dubai Trip + ₹2 Lakhs Gold'
+            },
+            {
+                condition: (counts, investment) =>
+                    counts['Gold'] >= 9 && counts['Platinum'] >= 5 && investment >= 30000000,
+                reward: 'Car Fund – ₹10 Lakhs'
+            },
+            {
+                condition: (counts, investment) =>
+                    counts['Platinum'] >= 7 && counts['Diamond'] >= 7 && investment >= 50000000,
+                reward: 'House Fund – ₹25 Lakhs'
+            }
+        ];
+
+        // Step 3: Check which milestone rewards the user qualifies for
+        const milestone_rewards_achieved = milestoneRewards
+            .filter(milestone => milestone.condition(rewardCounts, userTotalInvestment))
+            .map(milestone => milestone.reward);
+
+        // Final Response
         return res.status(200).json({
             Status: true,
             message: 'Get user info successful!',
@@ -1526,14 +1786,186 @@ exports.getUserData = async (req, res) => {
                 no_of_direct_referrals,
                 user_total_investment: userTotalInvestment,
                 direct_referral_total_investment: referralTotalInvestment,
-                rewards_achieved
+                //rewards_achieved,
+                milestone_rewards_achieved
             }
         });
+
     } catch (error) {
         console.error("Error in getUserData:", error);
         return res.status(500).json({ Status: false, message: 'Server Error', error: error.message });
     }
 };
+
+exports.getUserData2 = async (req, res) => {
+    try {
+        const { user_id } = req.params;
+
+        const data = await userService.findAndGetUserAccount(user_id);
+
+        if (!data || !data.data) {
+            return res.status(404).json({ Status: false, message: 'User Account Not Found' });
+        }
+
+        const user = data.data;
+        const no_of_direct_referrals = user.no_of_direct_referrals || 0;
+
+        let userTotalInvestment = 0;
+        let referralTotalInvestment = 0;
+
+        // Calculate user's approved investments
+        if (Array.isArray(user.investment_info)) {
+            user.investment_info.forEach(investment => {
+                if (
+                    investment.investment_status?.toLowerCase() === 'approved' &&
+                    typeof investment.invest_amount === 'number'
+                ) {
+                    userTotalInvestment += investment.invest_amount;
+                }
+            });
+        }
+
+        // Calculate referrals' approved investments
+        const referrals = await users.find({ sponsor_id: user.user_profile_id });
+
+        referrals.forEach(ref => {
+            if (Array.isArray(ref.investment_info)) {
+                ref.investment_info.forEach(investment => {
+                    if (
+                        investment.investment_status?.toLowerCase() === 'approved' &&
+                        typeof investment.invest_amount === 'number'
+                    ) {
+                        referralTotalInvestment += investment.invest_amount;
+                    }
+                });
+            }
+        });
+
+        // Rank-based reward criteria
+        const rewardCriteria = [
+            { name: 'Silver', amount: 50000, directReferrals: 2 },
+            { name: 'Gold', amount: 100000, directReferrals: 5 },
+            { name: 'Platinum', amount: 250000, directReferrals: 10 },
+            { name: 'Diamond', amount: 300000, directReferrals: 14 },
+        ];
+
+        let rewards = [...(user.rewards || [])];
+        const currentRewards = rewards.map(r => r.reward_name);
+        const now = new Date();
+
+        // Assign new rewards if eligible
+        rewardCriteria.forEach(rule => {
+            const eligible =
+                referralTotalInvestment >= rule.amount &&
+                no_of_direct_referrals >= rule.directReferrals;
+
+            if (eligible && !currentRewards.includes(rule.name)) {
+                rewards.push({
+                    reward_name: rule.name,
+                    reward_achieved_date: now
+                });
+            }
+        });
+
+        // Count each reward occurrence
+        const rewardCounts = rewards.reduce((acc, reward) => {
+            acc[reward.reward_name] = (acc[reward.reward_name] || 0) + 1;
+            return acc;
+        }, {});
+
+        // Logging for debugging
+        console.log("Reward Counts:", rewardCounts);
+        console.log("Rewards List:", rewards);
+
+        // Define milestone rewards
+        const milestoneRewards = [
+            {
+                condition: (counts, investment) =>
+                    (counts['Silver'] || 0) >= 2 && investment >= 2500000,
+                reward: 'Tablet'
+            },
+            {
+                condition: (counts, investment) =>
+                    (counts['Silver'] || 0) >= 5 && investment >= 5000000,
+                reward: 'Thailand/Malaysia Trip (2 people)'
+            },
+            {
+                condition: (counts, investment) =>
+                    (counts['Silver'] || 0) >= 6 &&
+                    (counts['Gold'] || 0) >= 3 &&
+                    investment >= 10000000,
+                reward: '₹2 Lakhs Worth of Gold'
+            },
+            {
+                condition: (counts, investment) =>
+                    (counts['Gold'] || 0) >= 6 &&
+                    (counts['Platinum'] || 0) >= 4 &&
+                    investment >= 20000000,
+                reward: 'Dubai Trip + ₹2 Lakhs Gold'
+            },
+            {
+                condition: (counts, investment) =>
+                    (counts['Gold'] || 0) >= 9 &&
+                    (counts['Platinum'] || 0) >= 5 &&
+                    investment >= 30000000,
+                reward: 'Car Fund – ₹10 Lakhs'
+            },
+            {
+                condition: (counts, investment) =>
+                    (counts['Platinum'] || 0) >= 7 &&
+                    (counts['Diamond'] || 0) >= 7 &&
+                    investment >= 50000000,
+                reward: 'House Fund – ₹25 Lakhs'
+            }
+        ];
+
+        let milestone_rewards_achieved = [...(user.milestone_rewards_achieved || [])];
+
+        // Assign new milestone rewards if eligible and not already achieved
+        milestoneRewards.forEach(milestone => {
+            if (
+                milestone.condition(rewardCounts, userTotalInvestment) &&
+                !milestone_rewards_achieved.includes(milestone.reward)
+            ) {
+                milestone_rewards_achieved.push(milestone.reward);
+            }
+        });
+
+        // Logging for milestone debug
+        console.log("Milestone Rewards Achieved:", milestone_rewards_achieved);
+
+        // Update user document if changes exist
+        const updates = {};
+        if (rewards.length > (user.rewards?.length || 0)) {
+            updates.rewards = rewards;
+        }
+
+        if (milestone_rewards_achieved.length > (user.milestone_rewards_achieved?.length || 0)) {
+            updates.milestone_rewards_achieved = milestone_rewards_achieved;
+        }
+
+        if (Object.keys(updates).length > 0) {
+            await users.updateOne({ _id: user._id }, { $set: updates });
+        }
+
+        return res.status(200).json({
+            Status: true,
+            message: 'Get user info successful!',
+            data: {
+                no_of_direct_referrals,
+                user_total_investment: userTotalInvestment,
+                direct_referral_total_investment: referralTotalInvestment,
+                milestone_rewards_achieved
+            }
+        });
+
+    } catch (error) {
+        console.error("Error in getUserData2:", error);
+        return res.status(500).json({ Status: false, message: 'Server Error', error: error.message });
+    }
+};
+
+
 
 
 

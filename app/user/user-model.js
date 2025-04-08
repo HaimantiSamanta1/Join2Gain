@@ -249,8 +249,9 @@ const userSchema = new Schema({
         type:String,
         default:" ",  
     },
-    rewards_achieved: [{
+    rewards: [{
         reward_name: { type: String, default: "" },
+        
         reward_achieved_date: {
             type: Date,
             default: null,

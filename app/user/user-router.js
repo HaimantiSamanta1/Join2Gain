@@ -22,7 +22,7 @@ route.get('/getUser/:user_id',userController.getUser11);
 //calculate refferal amount
 route.post('/getReferralPayoutAmountOfInvestment',userController.getReferralPayoutAmountOfInvestment);
 
-route.get('/getUserData/:user_id',userController.getUserData);
+route.get('/getUserData/:user_id',userController.getUserData11);
 
 //Edit user password
 route.patch('/editUserPassword/:user_id',VerifyJwtToken,userController.editUserPassword);
