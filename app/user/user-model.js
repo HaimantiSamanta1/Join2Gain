@@ -112,7 +112,12 @@ const userSchema = new Schema({
     referral_payouts: [{
         payout_date: { type: Date, default: null },
         amount: { type: Number, default: 0 },
-        status: { type: String, default: "Pending" }  // Pending, Approved, Rejected
+        status: { type: String, default: "Pending" },  // Pending, Approved, Rejected
+        investment_id :{
+            type: mongoose.Schema.Types.ObjectId,
+            default: null,
+            ref: 'usermaster'
+        },
     }],
     user_rank_info:[{
         rank_of_user:{

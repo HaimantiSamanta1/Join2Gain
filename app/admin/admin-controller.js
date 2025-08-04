@@ -414,3 +414,40 @@ exports.kycApprovedRejected = async (req, res) => {
     }
 }; 
 //Approved kyc END
+
+//Approved refferal payout START
+exports.referralPayoutsApprovedRejected = async (req, res) => {
+    try {
+        const { userId, payoutId, status } = req.body; 
+
+        if (!["Approved", "Rejected"].includes(status)) {
+            return res.status(400).json({ message: "Invalid status. Use 'Approved' or 'Rejected'." });
+        }
+        
+        const user = await users.findById(userId);
+        if (!user) {
+            return res.status(404).json({ Status: 'Error', message: 'User not found' });
+        }
+
+        const payout = user.referral_payouts.id(payoutId);
+        const investment = user.investment_info.id(payoutId);
+        console.log("payout",payout)
+        console.log("investment",investment)
+        if (!payout) {
+            return res.status(404).json({ Status: 'Error', message: 'referral payouts not found' });
+        }
+
+        payout.status = status;
+        await user.save(); 
+
+        return res.status(200).json({ 
+            Status: 'Success', 
+            message: `Referral payout status updated to ${status}.` 
+        });
+
+    } catch (error) {
+        console.error("Error updating referral payout status:", error);
+        return res.status(500).json({ message: "Internal Server Error" });
+    }
+};
+//Approved refferal payout END
